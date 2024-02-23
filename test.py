@@ -35,8 +35,8 @@ while True:
         cv.circle(frame, (chosen[0], chosen[1]), chosen[2], (255, 0, 255), 3)
         prevCircle = chosen
 
-    cv.imshow("circles", frame)
-    cv.imshow("blur", blurFrame)
+    cv.imshow("circles", cv.flip(frame, 1))
+    #cv.imshow("blur", cv.flip(blurFrame, 1))
     frame_count += 1
     if cv.waitKey(1) & 0xFF == ord('q'):
         break
