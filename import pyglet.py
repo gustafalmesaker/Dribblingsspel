@@ -6,6 +6,7 @@ new_window = pyglet.window.Window(width = 1300, height = 700, caption ='Dribblin
 seconds_played = 0.00
 counter = 0
 
+
 def update(dt):
     global seconds_played
     seconds_played += dt
@@ -46,37 +47,44 @@ counter_label = pyglet.text.Label('Points: 0',
                           anchor_y ='center')
 
 
+cursor = pyglet.shapes.Circle(x=new_window.width//2, y=new_window.height//2, radius=30)
+
+goalCircle = pyglet.shapes.Circle(x=random.randint(50, new_window.width-50), y=random.randint(50, new_window.height-50), radius=50)
+innerGoalCircle = pyglet.shapes.Circle(x=goalCircle.x, y=goalCircle.y, radius=45)
+goalCircle.color = (255, 255, 255, 200)
+innerGoalCircle.color = (0, 0, 0)
 
   
 @new_window.event
 def on_mouse_motion(x, y, dx, dy):
-    #if the whole circle is inside the goal circle
-    if (circle.x - goalCircle.x)**2 + (circle.y - goalCircle.y)**2 <= (goalCircle.radius - circle.radius)**2:
-        goalCircle.x = random.randint(50, new_window.width-50)
-        goalCircle.y = random.randint(50, new_window.height-50)
-        goalCircle.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    #if the whole cursor is inside the goal circle
+    if (cursor.x - goalCircle.x)**2 + (cursor.y - goalCircle.y)**2 <= (goalCircle.radius - cursor.radius)**2:
+        add_new_goal()
         
-
         #update(-1)
 
         global counter
         counter += 1
         counter_label.text = "Points: " + str(counter)
 
-    circle.x = x
-    circle.y = y
+    cursor.x = x
+    cursor.y = y
 
 
-circle = pyglet.shapes.Circle(x=new_window.width//2, y=new_window.height//2, radius=30)
-goalCircle = pyglet.shapes.Circle(x=random.randint(50, new_window.width-50), y=random.randint(50, new_window.height-50), radius=50)
-goalCircle.color = (255, 105, 180)
+def add_new_goal():
+    goalCircle.x = random.randint(50, new_window.width-50)
+    goalCircle.y = random.randint(50, new_window.height-50)
+    innerGoalCircle.x = goalCircle.x
+    innerGoalCircle.y = goalCircle.y
+
 
 
 @new_window.event
 def on_draw():
     new_window.clear()
     goalCircle.draw()
-    circle.draw()
+    innerGoalCircle.draw()
+    cursor.draw()
     label.draw()
     countdown_label.draw()
     counter_label.draw()
