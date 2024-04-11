@@ -1,0 +1,6 @@
+path: 'C:\Users\guffi\Documents\GitHub\Dribblingsspel\data'
+train: 'images/train'
+val: 'images/train'
+
+names:
+  0: ball
