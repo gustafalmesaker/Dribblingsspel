@@ -1,4 +1,4 @@
-path: 'C:\Users\guffi\Documents\GitHub\Dribblingsspel\data'
+path: 'C:\Users\guffi\Documents\GitHub\Dribblingsspel\_yolov8_ball_detector\code\data'
 train: 'images/train'
 val: 'images/train'
 
