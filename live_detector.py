@@ -5,7 +5,7 @@ import cv2
 #model = YOLO("models\model_v0.pt") #load created model
 model = YOLO("yolov8n.pt") #load pretrained model
 
-video_path = 'videos\test_ball_detection.gif'
+video_path = "videos\Test_ball_detection_2.mp4"
 cap = cv2.VideoCapture(video_path)
 
 ret = True
