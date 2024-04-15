@@ -1,0 +1,1 @@
+model trained on coco and pictures taken by us. 1 epoch

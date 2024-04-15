@@ -1,0 +1,1 @@
+coco data with our own pictures. 10 epochs. greater result than before.
