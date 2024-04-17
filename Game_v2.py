@@ -32,7 +32,7 @@ class Game:
         self.counter_label = pyglet.text.Label('Points: 0', font_name=self.font, font_size=self.font_size, x=self.new_window.width//2, y=self.new_window.height- 30, anchor_x='center', anchor_y='center')
         
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
-        self.goalCircle = goalCircle(x=random.randint(50, self.new_window.width-50), y=random.randint(50, self.new_window.height-50), radius=50)
+        self.goalCircle = goalCircle(x=random.randint(50, self.new_window.width-50), y=random.randint(50, self.new_window.height-50), radius=100)
         self.innerGoalCircle = goalCircle(x=self.goalCircle.x, y=self.goalCircle.y, radius=45)
         self.innerGoalCircle.color = (0, 0, 0)
         
@@ -52,6 +52,7 @@ class Game:
     def add_new_goal(self):
         self.goalCircle.x = random.randint(50, self.new_window.width-50)
         self.goalCircle.y = random.randint(50, self.new_window.height-50)
+        self.goalCircle.radius = 100
         self.innerGoalCircle.x = self.goalCircle.x
         self.innerGoalCircle.y = self.goalCircle.y
 
@@ -60,6 +61,9 @@ class Game:
         self.goalCircle.draw()
         self.cursor.draw()
         self.counter_label.draw()
+    
+    def timer(self, dt):
+        pyglet.clock(self.update, 1/60.0)
 
     def update(self, dt):
         pass
