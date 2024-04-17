@@ -1,0 +1,1 @@
+from deepsparse import Pipeline
