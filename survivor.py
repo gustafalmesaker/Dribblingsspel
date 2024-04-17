@@ -6,7 +6,9 @@ class goalCircle:
         self.x = x
         self.y = y
         self.radius = radius
+        self.inner_radius = radius-5
         self.color = (255, 255, 255, 200)
+        self.inner_color = (50,205,50, 200)
 
 class cursor:
     def __init__(self, x, y, radius):
@@ -27,6 +29,7 @@ class Timer:
 
     def reset(self):
         self.time_remaining = self.duration
+
 
 class Game:
     def __init__(self):
@@ -51,6 +54,9 @@ class Game:
         for goal in self.goalCircles:
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
+
+            pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
+            pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
         
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
 
@@ -75,7 +81,7 @@ class Game:
                 self.points += 1
                 break
             else:
-                self.animate_goal(dt)
+                self.animate_goal(goal,dt)
 
     def create_goal(self):
         x = random.randint(50, self.new_window.width-50)
@@ -91,20 +97,29 @@ class Game:
         goal = goalCircle(x, y, radius)
         self.goalCircles.append(goal)
     
-    def animate_goal(self, dt):
-        for goal in self.goalCircles:
-            if self.points/10 < 8:
-                goal.radius -=self.points/10
-            else:
-                goal.radius -= 8
+    def animate_goal(self,goal,dt):
 
-            if goal.radius <= 0:
-                self.goalCircles.remove(goal)
-                self.add_new_goal(goal)
-                self.timer.reset()
-                break
+        if self.points/10 < 8:
+            goal.inner_radius -=self.points/10   # Goal is made smaller every frame
+        else:
+            goal.inner_radius -= 8  
+
+        if goal.inner_radius <= goal.radius/4:
+            goal.inner_color = (255,0,0, 200)       # Change color of inner circle when it is less than 1/4 of the goal circle (red)
+
+        elif goal.inner_radius <= goal.radius/2:
+            goal.inner_color = (255,165,0, 200)      # Change color of inner circle when it is less than 1/2 of the goal circle (orange)
+
+           
+
+        if goal.inner_radius <= 0:                # If goal is completely gone, remove it and create a new goal
+            self.goalCircles.remove(goal)
+            self.add_new_goal(goal)
+            #self.timer.reset()
+    
 
 
 if __name__ == "__main__":
     game = Game()
     pyglet.app.run()
+
