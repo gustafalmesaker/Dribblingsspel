@@ -3,6 +3,7 @@ import cv2
 
 
 model = YOLO("models\model_v1.1.pt") #load created model
+ov_model = YOLO('models\model_v1.1_openvino_model/') #load openvino model
 #model = YOLO("yolov8n.pt") #load pretrained model
 
 #video_path = "videos\Test_ball_detection_2.mp4"
@@ -17,7 +18,8 @@ while ret:
     if ret:
         ret, frame = cap.read()
 
-        results = model.track(frame, persist=True)
+        results = ov_model.track(frame, persist=True)
+        #results = model.track(frame, persist=True)
         frame_ = results[0].plot()
 
 
