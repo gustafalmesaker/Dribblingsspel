@@ -124,22 +124,28 @@ class Game:
     
     def animate_goal(self,goal,dt):
 
-        if self.points/10 < 8:
-            goal.inner_radius -=self.points/10   # Goal is made smaller every frame
-        else:
-            goal.inner_radius -= 8  
+        shrink_rate = min(self.points / 8, 8)  # Define the shrink rate based on points
 
-        if goal.inner_radius <= goal.radius/4:
-            goal.inner_color = (255,0,0, 200)       # Change color of inner circle when it is less than 1/4 of the goal circle (red)
+        # Shrink the goal circle
+        goal.inner_radius -= shrink_rate
 
-        elif goal.inner_radius <= goal.radius/2:
-            goal.inner_color = (255,165,0, 200)      # Change color of inner circle when it is less than 1/2 of the goal circle (orange)
+        # Calculate the ratio of inner radius to outer radius
+        ratio = goal.inner_radius / goal.radius
 
+        # Interpolate color gradually from green to red based on the ratio
+        goal.inner_color = (
+            int(254 * (1 - ratio)),             # Red component decreases
+            int(180 * ratio),                   # Green component increases
+            int(73 * ratio),                    # Blue component increases
+            255                                 # Alpha remains constant
+        )
 
-        if goal.inner_radius <= 0:                # If goal is completely gone, remove it and create a new goal
+        # If goal is completely gone, remove it and create a new goal
+        if goal.inner_radius <= 0:
             self.goalCircles.remove(goal)
             self.add_new_goal(goal)
-            #self.timer.reset()
+            # self.timer.reset()
+
     
 
 
