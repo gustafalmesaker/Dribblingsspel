@@ -118,18 +118,18 @@ class Game:
         #     x = random.randint(x_min, x_max)
         #     y = random.randint(y_min, y_max)
 
-        radius = 100-self.time_rad
+        radius = 100
         goal = goalCircle(x, y, radius)
         self.goalCircles.append(goal)
     
     def animate_goal(self,goal,dt):
 
-        shrink_rate = min(self.points / 8, 8)  # Define the shrink rate based on points
+        shrink_rate = min(self.points / 8, 8)  # Define the shrink rate based on points (max 8)
 
         # Shrink the goal circle
         goal.inner_radius -= shrink_rate
 
-        # Calculate the ratio of inner radius to outer radius
+        # Calculate the ratio of inner radius to outer radius   (goes from 0 to 1 as inner radius decreases)
         ratio = goal.inner_radius / goal.radius
 
         # Interpolate color gradually from green to red based on the ratio
