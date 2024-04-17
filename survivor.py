@@ -52,12 +52,15 @@ class Game:
 
     def draw(self):
         for goal in self.goalCircles:
+            # Outer circle of goal
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
 
+            # Inner circle of goal
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
         
+        # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
 
     def on_draw(self):
@@ -70,7 +73,7 @@ class Game:
         self.cursor.y = y
 
     def update(self, dt):
-        print(self.timer.time_remaining)
+        #print(self.timer.time_remaining)
         for goal in self.goalCircles:
             # Goal is made smaller when cursor is inside the goal circle
             
@@ -81,7 +84,7 @@ class Game:
                 self.points += 1
                 break
             else:
-                self.animate_goal(goal,dt)
+                self.animate_goal(goal,dt)  # Animate the goal circle
 
     def create_goal(self):
         x = random.randint(50, self.new_window.width-50)
@@ -91,8 +94,30 @@ class Game:
         self.goalCircles.append(goal)
 
     def add_new_goal(self, goal):
+         #migth be better to just move the goal to a new location instead of creating a new one
         x = random.randint(50, self.new_window.width-50)
         y = random.randint(50, self.new_window.height-50)
+
+        # Make sure the new goal is not too close to the previous goal
+        while True:                                                 
+            if abs(goal.x - x) < 200 and abs(goal.y - y) < 200:
+                x = random.randint(50, self.new_window.width-50)
+                y = random.randint(50, self.new_window.height-50)
+                print("close position")
+            else:
+                break
+
+       #might use this instead of loop, but not working as expected
+
+        # if abs(goal.x - x) < 100 and abs(goal.y - y) < 100:
+        #     print("close position")
+        #     x_min = max(50, goal.x - 100)
+        #     x_max = min(self.new_window.width - 50, goal.x + 100)
+        #     y_min = max(50, goal.y - 100)
+        #     y_max = min(self.new_window.height - 50, goal.y + 100)
+        #     x = random.randint(x_min, x_max)
+        #     y = random.randint(y_min, y_max)
+
         radius = 100-self.time_rad
         goal = goalCircle(x, y, radius)
         self.goalCircles.append(goal)
@@ -110,7 +135,6 @@ class Game:
         elif goal.inner_radius <= goal.radius/2:
             goal.inner_color = (255,165,0, 200)      # Change color of inner circle when it is less than 1/2 of the goal circle (orange)
 
-           
 
         if goal.inner_radius <= 0:                # If goal is completely gone, remove it and create a new goal
             self.goalCircles.remove(goal)
