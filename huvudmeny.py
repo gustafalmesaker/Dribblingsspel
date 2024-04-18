@@ -55,13 +55,17 @@ class Game:
 
     def draw(self):
         for button in self.circleButtons:
+
+            # Inner circle of button
+            if (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2 <= (button.radius - self.cursor.radius)**2:
+                pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.inner_radius, color=button.inner_color).draw()
+                pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.inner_radius-5, color=(0, 0, 0)).draw()
+
             # Outer circle of button
             pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.radius, color=button.color).draw()
             pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.radius-5, color=(0, 0, 0)).draw()
 
-            # Inner circle of button
-            pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.inner_radius, color=button.inner_color).draw()
-            pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.inner_radius-5, color=(0, 0, 0)).draw()
+            
         
         # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
@@ -81,13 +85,12 @@ class Game:
             # button is made smaller when cursor is inside the button circle
             
             if (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2 <= (button.radius - self.cursor.radius)**2:
-                
                 self.animate_button(button,dt)  # Animate the button circle
                  # Create a new button
                 self.points = 20
             else:
-                button.inner_radius = button.radius - 5
-                button.inner_color = (50,205,50,200)
+                button.inner_radius = button.radius + 30
+                button.inner_color = (255, 255, 255, 200)
                 
 
             
@@ -113,21 +116,21 @@ class Game:
     def animate_button(self,button,dt):
 
         if self.points/10 < 8:
-            button.inner_radius -=self.points/10   # button is made smaller every frame
+            button.inner_radius -=self.points/10 # button is made smaller every frame
         else:
-            button.inner_radius -= 8  
+            button.inner_radius -= 8    
 
-        if button.inner_radius <= button.radius/4:
-            button.inner_color = (255,0,0, 200)       # Change color of inner circle when it is less than 1/4 of the button circle (red)
+        #if button.inner_radius <= button.radius/4:
+            #button.inner_color = (255,0,0, 200)       # Change color of inner circle when it is less than 1/4 of the button circle (red)
 
-        elif button.inner_radius <= button.radius/2:
-            button.inner_color = (255,165,0, 200)      # Change color of inner circle when it is less than 1/2 of the button circle (orange)
+        #elif button.inner_radius <= button.radius/2:
+            #button.inner_color = (255,165,0, 200)      # Change color of inner circle when it is less than 1/2 of the button circle (orange)
 
 
-        if button.inner_radius <= 0:                # If button is completely gone, remove it and create a new button
+        if button.radius == button.inner_radius:                # If button is completely gone, remove it and create a new button
             self.circleButtons.remove(button)
             #self.add_new_button(button)
-            #self.timer.reset()
+            self.timer.reset()
     
 
 
