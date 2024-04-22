@@ -16,20 +16,6 @@ class cursor:
         self.y = y
         self.radius = radius
 
-#is not used
-class Timer:
-    def __init__(self, duration):
-        self.duration = duration
-        self.time_remaining = duration
-
-    def update(self, dt):
-        self.time_remaining -= dt
-        if self.time_remaining <= 0:
-            self.reset()
-        #print(self.time_remaining)
-
-    def reset(self):
-        self.time_remaining = self.duration
 
 class pointSystem:
     def __init__(self):
@@ -38,7 +24,7 @@ class pointSystem:
         self.streak = 0
 
     def update_points(self):
-        
+
         points = 1 # Base points for each goal
 
         if points > 2000:   # Points are calculated based on the number of goals
@@ -62,13 +48,13 @@ class pointSystem:
             points += 2
 
         self.points += points
-    
+
     def update_streak(self):
         self.streak += 1
 
     def reset_points(self):
         self.points = 0
-    
+
     def reset_streak(self):
         self.streak = 0
 
@@ -88,12 +74,8 @@ class Game:
         self.point_system = pointSystem() # Create a point system object
 
         self.new_window.push_handlers(self)
-        pyglet.clock.schedule_interval(self.update, 1/10.0)
 
         self.new_window.set_mouse_visible(False)
-        self.timer = Timer(10.0)
-        pyglet.clock.schedule_interval(self.timer.update, 1/10.0)
-        self.time_rad = 10
 
     def draw(self):
         for goal in self.goalCircles:
@@ -104,16 +86,16 @@ class Game:
             # Inner circle of goal
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
-        
+
         # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
 
-        #Points display in top midde of screen 
+        #Points display in top midde of screen
         pyglet.text.Label("Points: " + str(self.point_system.points), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 -100, y=self.new_window.height-50, anchor_x='center').draw()
 
         #Streak display next to points
         pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center').draw()
-    
+
     def on_draw(self):
         self.new_window.clear()
         self.draw()
@@ -127,11 +109,10 @@ class Game:
         #print(self.timer.time_remaining)
         for goal in self.goalCircles:
             # Goal is made smaller when cursor is inside the goal circle
-            
+
             if (self.cursor.x - goal.x)**2 + (self.cursor.y - goal.y)**2 <= (goal.radius - self.cursor.radius)**2:
                 self.goalCircles.remove(goal)
                 self.add_new_goal(goal) # Create a new goal
-                self.timer.reset() # Reset the timer
 
                 self.point_system.update_streak() # Update the streak (needs to be before updating points)
                 self.point_system.update_points() # Update the points
@@ -157,31 +138,10 @@ class Game:
         x = random.randint(50, self.new_window.width-50)
         y = random.randint(50, self.new_window.height-50)
 
-        # Make sure the new goal is not too close to the previous goal
-        while True:                                                 
-            if abs(goal.x - x) < 200 and abs(goal.y - y) < 200:
-                x = random.randint(50, self.new_window.width-50)
-                y = random.randint(50, self.new_window.height-50)
-                print("close position")
-            else:
-                break
-
-       #might use this instead of loop, but not working as expected
-
-
-        # if abs(goal.x - x) < 100 and abs(goal.y - y) < 100:
-        #     print("close position")
-        #     x_min = max(50, goal.x - 100)
-        #     x_max = min(self.new_window.width - 50, goal.x + 100)
-        #     y_min = max(50, goal.y - 100)
-        #     y_max = min(self.new_window.height - 50, goal.y + 100)
-        #     x = random.randint(x_min, x_max)
-        #     y = random.randint(y_min, y_max)
-
         radius = 100
         goal = goalCircle(x, y, radius)
         self.goalCircles.append(goal)
-    
+
     def animate_goal(self,goal,dt):
         print(self.counter)
         shrink_rate = min(self.counter / 12, 12)  # Define the shrink rate based on points (max 8)
@@ -206,10 +166,10 @@ class Game:
             self.goalCircles.remove(goal)
             self.counter //= 2              # Reset the counter to half of the previous value (rounded down)
             self.add_new_goal(goal)
-            # self.timer.reset() 
- 
+            # self.timer.reset()
 
-if __name__ == "__main__":
-    game = Game()
-    pyglet.app.run(interval=1/120.0)
+
+# if __name__ == "__main__":
+#     game = Game()
+#     pyglet.app.run(interval=1/120.0)
 
