@@ -1,7 +1,6 @@
 import pyglet 
 from pyglet import font
 
-
 font.add_file('Assets/bebas/Bebas-Regular.ttf')
 Bebas = font.load('Bebas', 16)
 
@@ -14,7 +13,6 @@ imgbutton.height = imgbutton.height
 
 
 
-
 class circleButton:
     def __init__(self, x, y, radius):
         self.x = x
@@ -23,7 +21,6 @@ class circleButton:
         self.outer_radius = radius-5
         self.color = (22,37,33,255)
         self.outer_color = (22,37,33,255)
-
 
     
 
@@ -48,10 +45,9 @@ class Timer:
         self.time_remaining = self.duration
 
 
-class huvudmeny:
+class chooseGame:
 
-    def __init__(self, switch_callback):
-        self.switch_callback = switch_callback
+    def __init__(self):
         self.new_window = pyglet.window.Window(width=1200, height=600)
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
@@ -60,7 +56,6 @@ class huvudmeny:
         self.points = 0
         self.circleButtons = []
         self.create_button()
-        self.x = 1
 
         self.new_window.push_handlers(self)
         pyglet.clock.schedule_interval(self.update, 1/10.0)
@@ -118,7 +113,7 @@ class huvudmeny:
         
         self.buttons.draw() 
 
-        titel = pyglet.text.Label('Project Mbappe',
+        titel = pyglet.text.Label('Välj spel',
                           font_name='Bebas',
                           font_size=75,
                           x=self.new_window.width//2, y=self.new_window.height*(0.85),
@@ -137,13 +132,9 @@ class huvudmeny:
             # button is made smaller when cursor is inside the button circle
             
             if (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2 <= (button.radius - self.cursor.radius)**2:
-                self.x = 2
                 self.animate_button(button,dt)  # Animate the button circle
                  # Create a new button
                 self.points = 20
-                self.switch_callback(self.x)
-                
-                
             else:
                 button.outer_radius = button.radius + 30
                 button.outer_color = (2,189,20,255)
