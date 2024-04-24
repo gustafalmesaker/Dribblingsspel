@@ -2,9 +2,8 @@ import pyglet
 import random
 
 class goalCircle:
-    def __init__(self, x, y, radius):
-        self.x = x
-        self.y = y
+    def __init__(self, pos, radius):
+        self.x, self.y = pos
         self.radius = radius
         self.inner_radius = radius-5
         self.color = (255, 255, 255, 200)
@@ -59,15 +58,15 @@ class pointSystem:
         self.streak = 0
 
 
-class Game:
+class Game():
     def __init__(self):
-        self.new_window = pyglet.window.Window(width=1020, height=780)
+        self.new_window = pyglet.window.Window(width=1920, height=1080)
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
 
         self.goalCircles = []
-        self.create_goal()
+        #self.add_new_goal()
 
         self.counter = 0    # counts how many goals have been reached, and is used to determine the shrink rate (starts at 0)
 
@@ -77,8 +76,40 @@ class Game:
 
         self.new_window.set_mouse_visible(False)
 
+    def initial_position(self, initial_positions):
+        
+        pos1 = (200, self.new_window.height-200)
+        pos2 = (self.new_window.width//2, self.new_window.height-200)
+        pos3 = (self.new_window.width-200, self.new_window.height-200)
+
+        pos4 = (200, 200)
+        pos5 = (self.new_window.width//2, 200)
+        pos6 = (self.new_window.width-200, 200)
+
+        radius = 100
+        for position in initial_positions:
+
+            if position == 1:
+                self.add_new_goal(pos1)
+            elif position == 2:
+                self.add_new_goal(pos2)
+            elif position == 3:
+                self.add_new_goal(pos3)
+            elif position == 4:
+                self.add_new_goal(pos4)
+            elif position == 5:
+                self.add_new_goal(pos5)
+            elif position == 6:
+                self.add_new_goal(pos6)
+            else:
+                pass
+            
+              
+
     def draw(self):
-        for goal in self.goalCircles:
+        # Draw the first goal in the list
+        if self.goalCircles:
+            goal = self.goalCircles[0]
             # Outer circle of goal
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
@@ -86,6 +117,15 @@ class Game:
             # Inner circle of goal
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
+            
+        # for goal in self.goalCircles:
+        #     # Outer circle of goal
+        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
+        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
+
+        #     # Inner circle of goal
+        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
+        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
 
         # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
@@ -107,12 +147,16 @@ class Game:
 
     def update(self, dt):
         #print(self.timer.time_remaining)
-        for goal in self.goalCircles:
+        if self.goalCircles:
+            goal = self.goalCircles[0]
+
             # Goal is made smaller when cursor is inside the goal circle
 
             if (self.cursor.x - goal.x)**2 + (self.cursor.y - goal.y)**2 <= (goal.radius - self.cursor.radius)**2:
+                pos = (goal.x, goal.y)
+                self.add_new_goal(pos)
                 self.goalCircles.remove(goal)
-                self.add_new_goal(goal) # Create a new goal
+                #self.add_new_goal() # Create a new goal
 
                 self.point_system.update_streak() # Update the streak (needs to be before updating points)
                 self.point_system.update_points() # Update the points
@@ -122,28 +166,17 @@ class Game:
                     pass
                 else:
                     self.counter += 1
-                break
             else:
                 self.animate_goal(goal,dt)  # Animate the goal circle
 
-    def create_goal(self):
-        x = random.randint(50, self.new_window.width-50)
-        y = random.randint(50, self.new_window.height-50)
-        radius = 100
-        goal = goalCircle(x, y, radius)
-        self.goalCircles.append(goal)
-
-    def add_new_goal(self, goal):
-         #migth be better to just move the goal to a new location instead of creating a new one
-        x = random.randint(50, self.new_window.width-50)
-        y = random.randint(50, self.new_window.height-50)
-
-        radius = 100
-        goal = goalCircle(x, y, radius)
+    def add_new_goal(self, pos):
+       
+        radius = 80
+        goal = goalCircle(pos, radius)
         self.goalCircles.append(goal)
 
     def animate_goal(self,goal,dt):
-        print(self.counter)
+        #print(self.counter)
         shrink_rate = min(self.counter / 12, 12)  # Define the shrink rate based on points (max 8)
 
         # Shrink the goal circle
@@ -164,8 +197,9 @@ class Game:
         if goal.inner_radius <= 0:
             self.point_system.reset_streak()
             self.goalCircles.remove(goal)
+            self.goalCircles.append(goal)
             self.counter //= 2              # Reset the counter to half of the previous value (rounded down)
-            self.add_new_goal(goal)
+            
             # self.timer.reset()
 
 
