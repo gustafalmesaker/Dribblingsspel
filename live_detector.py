@@ -38,7 +38,6 @@ while ret:
             frame_ = filtered_results[0].plot()
         else:
             frame_ = results[0].plot()
-            print("ass")
     
         
         cv2.imshow('frame', frame_)

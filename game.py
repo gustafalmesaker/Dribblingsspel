@@ -1,0 +1,62 @@
+#sports
+from ultralytics import YOLO
+import cv2
+
+import openvino.properties as props
+import openvino.properties.hint as hints
+
+#game
+import pyglet
+
+window = pyglet.window.Window(width=640, height=640)
+
+
+#detection model
+#model = YOLO("models\model_v1.1.pt",task="detect") #load created model
+ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
+#model = YOLO("yolov8n.pt") #load pretrained model
+
+cap = cv2.VideoCapture(0)
+ret = True
+
+def on_draw(circle_centers):
+    window.clear()
+    for x , y in circle_centers:
+         x = int(window.width * x)
+         y = int(window.height * y)
+         
+         
+         pyglet.shapes.Circle(x=x, y=y, radius=10, color=(255,255,0)).draw()
+         #pyglet.graphics.draw(1, pyglet.gl.GL_POINTS, ('v2f', (x, y)), ('c3B', (255, 255, 255))) 
+
+def exit_game():
+    cap.release()  # Release the camera capture device
+    pyglet.app.exit()  # Terminate the Pyglet application
+
+def center_points(results):
+    box_list = []
+    for box in results[0].boxes.xywhn:
+        # Extracting bounding box coordinates
+        x_n, y_n, w , h = box
+        box_list.append([x_n, y_n])
+    return box_list
+
+def update(dt):
+    ret, frame = cap.read()
+    if ret is False:
+        exit_game()
+    frame = cv2.resize(frame , (640 , 640), interpolation=cv2.INTER_LINEAR)
+    results = ov_model.track(frame, persist=True)
+    if results[0] is not None:
+            circle_centers = center_points(results=results)
+            on_draw(circle_centers=circle_centers)
+    
+
+
+# Schedule the update function to be called regularly
+pyglet.clock.schedule_interval(update, 1/30.0)
+
+# Start the game loop
+pyglet.app.run()
+        
+    
