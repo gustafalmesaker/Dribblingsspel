@@ -1,7 +1,6 @@
 import pyglet
 import random
 from Read_file import read_csv
-from tracking import tracking
 
 class goalCircle:
     def __init__(self, pos, radius):
@@ -194,13 +193,12 @@ class Game():
         self.cursor.x = x
         self.cursor.y = y
 
-    def ball_position(self,x, y):
-        self.cursor.x = x
-        self.cursor.y = y
+    def ball_position(self,x,y):
+        #print(x, y)
+        self.cursor.x = self.new_window.width * x
+        self.cursor.y = self.new_window.height * y
 
     def update(self, dt):
-
-        self.ball_position(tracking.center_circles[0][0], tracking.center_circles[0][1])
 
         if self.goalCircles:
             goal = self.goalCircles[0]

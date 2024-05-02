@@ -4,15 +4,16 @@ import cv2
 
 ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 ret = True
 
-class tracking:
+class tracking():
     def __init__(self):
-        self.circle_points = []
+        self.circle_pos_x = 600
+        self.circle_pos_y = 600
 
     #find where sports balls are located (id 32)
-    def center_points(results):
+    def center_points(self,results):
         box_list = []
         sports_ball_id = 32
 
@@ -24,11 +25,17 @@ class tracking:
         return box_list
         
 
-    def update_pos(dt):
+    def update_pos(self,dt):
         ret, frame = cap.read()
 
         frame = cv2.resize(frame , (1420 , 800), interpolation=cv2.INTER_LINEAR)
         results = ov_model.track(frame, persist=True)
+
         if results[0] is not None:
-            self.circle_centers = center_points(results=results) 
+            pos = self.center_points(results)
+            if pos != []:
+                self.circle_pos_x,self.circle_pos_y = pos[0]
+        else:
+            self.circle_pos_x = self.circle_pos_x
+            self.circle_pos_y = self.circle_pos_y      
 

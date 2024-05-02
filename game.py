@@ -13,7 +13,7 @@ window = pyglet.window.Window(width=640, height=640)
 ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
 #model = YOLO("yolov8n.pt") #load pretrained model
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 ret = True
 
 def on_draw(circle_centers):
@@ -50,6 +50,9 @@ def update(dt):
     results = ov_model.track(frame, persist=True)
     if results[0] is not None:
             circle_centers = center_points(results=results)
+            if circle_centers != []:
+                x,y = circle_centers[0]
+                print(x,y)
             on_draw(circle_centers=circle_centers)
     
 
