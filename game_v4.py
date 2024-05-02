@@ -1,13 +1,14 @@
 import pyglet
 import random
+from Read_file import read_csv
 
 class goalCircle:
     def __init__(self, pos, radius):
         self.x, self.y = pos
         self.radius = radius
         self.inner_radius = radius-5
-        self.color = (255, 255, 255, 200)
-        self.inner_color = (50,205,50, 200)
+        self.color = (2, 189, 20, 255)
+        self.inner_color = (50,205,50)
 
 class cursor:
     def __init__(self, x, y, radius):
@@ -18,7 +19,6 @@ class cursor:
 
 class pointSystem:
     def __init__(self):
-        self.goals = 0
         self.points = 0
         self.streak = 0
 
@@ -60,15 +60,15 @@ class pointSystem:
 
 class Game():
     def __init__(self):
-        self.new_window = pyglet.window.Window(width=1400, height=800)
+        self.new_window = pyglet.window.Window(width=1920, height=1080, caption="Game", resizable=False )
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
-
-        self.positions = []
-
+        
+        # Read data from the CSV file
+        self.exercises, self.positions_from_file = read_csv('exercise_positions.csv')
+        self.hash = 0
         self.goalCircles = []
-        #.add_new_goal()
 
 
         self.counter = 0    # counts how many goals have been reached, and is used to determine the shrink rate (starts at 0)
@@ -79,32 +79,24 @@ class Game():
 
         self.new_window.set_mouse_visible(False)
 
-    def initial_position(self, initial_positions):
+    def initial_position(self):
          #random number between 1 and 11
-        hash = random.randint(0, 10)
-        print(hash)
+        self.hash = random.randint(0, 10)
 
-        if self.positions == []:
-            print("empty list")
+        print("New hash: ", self.hash)
 
-            #add the positions to the list
-            self.positions = initial_positions[hash]
+        pos1 = (150, self.new_window.height-150)
+        pos2 = (self.new_window.width//2, self.new_window.height-150)
+        pos3 = (self.new_window.width-150, self.new_window.height-150)
 
-            print(initial_positions[hash])
-            print(self.positions)
-
-        pos1 = (200, self.new_window.height-200)
-        pos2 = (self.new_window.width//2, self.new_window.height-200)
-        pos3 = (self.new_window.width-200, self.new_window.height-200)
-
-        pos4 = (200, 200)
-        pos5 = (self.new_window.width//2, 200)
-        pos6 = (self.new_window.width-200, 200)
+        pos4 = (150, 150)
+        pos5 = (self.new_window.width//2, 150)
+        pos6 = (self.new_window.width-150, 150)
 
         
-        for position in self.positions:
-            print("entered for loop")
-            print(position)
+        for position in self.positions_from_file[self.hash]:
+            #print("entered for loop")
+            #print(position)
 
             if position == "1":
                 self.add_new_goal(pos1)
@@ -115,48 +107,56 @@ class Game():
             elif position == "4":
                 self.add_new_goal(pos4)
             elif position == "5":
-                print("entered pos5")
                 self.add_new_goal(pos5)
             elif position == "6":
                 self.add_new_goal(pos6)
             else:
                 pass
+
             
     def field(self):
+        line_width = 15
+        dot_radius = 25
 
-        pos1 = (200, self.new_window.height-200)
-        pos2 = (self.new_window.width//2, self.new_window.height-200)
-        pos3 = (self.new_window.width-200, self.new_window.height-200)
 
-        pos4 = (200, 200)
-        pos5 = (self.new_window.width//2, 200)
-        pos6 = (self.new_window.width-200, 200)
+        pos1 = (150, self.new_window.height-150)
+        pos2 = (self.new_window.width//2, self.new_window.height-150)
+        pos3 = (self.new_window.width-150, self.new_window.height-150)
+
+        pos4 = (150, 150)
+        pos5 = (self.new_window.width//2, 150)
+        pos6 = (self.new_window.width-150, 150)
+
+        #draw outer rectangle
+        pyglet.shapes.Rectangle(x=0, y=0, width=self.new_window.width, height=self.new_window.height, color=(2, 189, 20)).draw()
+        #draw inner rectangle
+        pyglet.shapes.Rectangle(x=10, y=10, width=self.new_window.width-20, height=self.new_window.height-20, color=(0, 0, 0)).draw()
 
         # Draw lines between the position pos1 and pos3
-        pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos3[0], y2=pos3[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20)).draw()
         # Draw lines between the position pos3 and pos6
-        pyglet.shapes.Line(x=pos3[0], y=pos3[1], x2=pos6[0], y2=pos6[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos3[0], y=pos3[1], x2=pos6[0], y2=pos6[1], width=line_width, color=(2, 189, 20)).draw()
         # Draw lines between the position pos6 and pos4
-        pyglet.shapes.Line(x=pos6[0], y=pos6[1], x2=pos4[0], y2=pos4[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos6[0], y=pos6[1], x2=pos4[0], y2=pos4[1], width=line_width, color=(2, 189, 20)).draw()
         # Draw lines between the position pos4 and pos1
-        pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=line_width, color=(2, 189, 20)).draw()
 
         #draw lines between the position pos2 and pos5
-        pyglet.shapes.Line(x=pos2[0], y=pos2[1], x2=pos5[0], y2=pos5[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos2[0], y=pos2[1], x2=pos5[0], y2=pos5[1], width=line_width, color=(2, 189, 20)).draw()
         
  
         # Draw lines between the position pos1 and pos5
-        pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=line_width, color=(2, 189, 20)).draw()
         # Draw lines between the position pos5 and pos3
-        pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=8, color=(255, 255, 255)).draw()
+        pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20)).draw()
 
         #draw dots at the positions
-        pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=15, color=(255, 255, 255)).draw()
-        pyglet.shapes.Circle(x=pos2[0], y=pos2[1], radius=15, color=(255, 255, 255)).draw()
-        pyglet.shapes.Circle(x=pos3[0], y=pos3[1], radius=15, color=(255, 255, 255)).draw()
-        pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=15, color=(255, 255, 255)).draw()
-        pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=15, color=(255, 255, 255)).draw()
-        pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=15, color=(255, 255, 255)).draw()
+        pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=dot_radius, color=(2, 189, 20)).draw()
+        pyglet.shapes.Circle(x=pos2[0], y=pos2[1], radius=dot_radius, color=(2, 189, 20)).draw()
+        pyglet.shapes.Circle(x=pos3[0], y=pos3[1], radius=dot_radius, color=(2, 189, 20)).draw()
+        pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=(2, 189, 20)).draw()
+        pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=(2, 189, 20)).draw()
+        pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=(2, 189, 20)).draw()
 
           
 
@@ -174,14 +174,6 @@ class Game():
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
             pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
             
-        # for goal in self.goalCircles:
-        #     # Outer circle of goal
-        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
-        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
-
-        #     # Inner circle of goal
-        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
-        #     pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
 
         # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
@@ -209,61 +201,50 @@ class Game():
             # Goal is made smaller when cursor is inside the goal circle
 
             if (self.cursor.x - goal.x)**2 + (self.cursor.y - goal.y)**2 <= (goal.radius - self.cursor.radius)**2:
-                self.goalCircles.remove(goal) # Remove the goal circle
-                #pos = (goal.x, goal.y)
-                #self.add_new_goal()
-                
-                #self.add_new_goal() # Create a new goal
 
+                self.goalCircles.remove(goal) # Remove the goal circlel
                 self.point_system.update_streak() # Update the streak (needs to be before updating points)
                 self.point_system.update_points() # Update the points
 
-                if self.counter >= 12*12:
-                    #do nothing
-                    pass
-                else:
-                    self.counter += 1
+                if self.counter <= 12*12:
+                   self.counter += 1
+                    
             else:
                 self.animate_goal(goal,dt)  # Animate the goal circle
         else:
-            print("empty goal circle")
-            self.initial_position(self.positions)
+            self.initial_position()
 
     def add_new_goal(self, pos):
-            print("entered add_new_goal")
-            radius = 80
+            radius = 100
             goal = goalCircle(pos, radius)
             self.goalCircles.append(goal)
         
 
     def animate_goal(self,goal,dt):
-        #print(self.counter)
         shrink_rate = min(self.counter / (12*6), 12)  # Define the shrink rate based on points (max 8)
 
         # Shrink the goal circle
         goal.inner_radius -= shrink_rate
 
         # Calculate the ratio of inner radius to outer radius   (goes from 0 to 1 as inner radius decreases)
-        ratio = goal.inner_radius / goal.radius
+        ratio = (goal.inner_radius+5) / goal.radius
+        print(ratio)
 
         # Interpolate color gradually from green to red based on the ratio
         goal.inner_color = (
-            int(254 * (1 - ratio)),             # Red component decreases
-            int(180 * ratio),                   # Green component increases
-            int(73 * ratio),                    # Blue component increases
+            int(2 + ((1-ratio) * (253))),     # Red component increases
+            int(189 - ((1-ratio)*189)),           # Green component decreases
+            int(20 - ((1-ratio) *20)),            # Blue component decreases
             255                                 # Alpha remains constant
         )
 
         # If goal is completely gone, remove it and create a new goal
         if goal.inner_radius <= 0:
-            self.point_system.reset_streak()
-            self.goalCircles.remove(goal)
 
-            #pos = (goal.x, goal.y)
-            #self.add_new_goal()
+            self.point_system.reset_streak() # Reset the streak (reduces points to base value)
+            self.goalCircles.remove(goal)    # Remove the goal circle
             self.counter //= 2              # Reset the counter to half of the previous value (rounded down)
             
-            # self.timer.reset()
 
 
 # if __name__ == "__main__":

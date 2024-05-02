@@ -15,7 +15,7 @@ exercises, positions = read_csv('exercise_positions.csv')
 
 game=Game()
 
-game.initial_position(positions)
+#game.initial_position(positions)
 
 pyglet.clock.schedule_interval(game.update, 1/60.0)
 
