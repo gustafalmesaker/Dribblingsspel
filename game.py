@@ -2,9 +2,6 @@
 from ultralytics import YOLO
 import cv2
 
-import openvino.properties as props
-import openvino.properties.hint as hints
-
 #game
 import pyglet
 
@@ -16,7 +13,7 @@ window = pyglet.window.Window(width=640, height=640)
 ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
 #model = YOLO("yolov8n.pt") #load pretrained model
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 ret = True
 
 def on_draw(circle_centers):
@@ -24,22 +21,26 @@ def on_draw(circle_centers):
     for x , y in circle_centers:
          x = int(window.width * x)
          y = int(window.height * y)
-         
-         
          pyglet.shapes.Circle(x=x, y=y, radius=10, color=(255,255,0)).draw()
-         #pyglet.graphics.draw(1, pyglet.gl.GL_POINTS, ('v2f', (x, y)), ('c3B', (255, 255, 255))) 
+         
 
 def exit_game():
     cap.release()  # Release the camera capture device
     pyglet.app.exit()  # Terminate the Pyglet application
 
+
+#find where sports balls are located (id 32)
 def center_points(results):
     box_list = []
-    for box in results[0].boxes.xywhn:
-        # Extracting bounding box coordinates
-        x_n, y_n, w , h = box
-        box_list.append([x_n, y_n])
+    sports_ball_id = 32
+
+    if results[0].boxes.xyxy is not None:
+         for obj in results[0].boxes:
+              if obj.cls == sports_ball_id:
+                   x_n, y_n, w, h = obj.xywhn[0].tolist()
+                   box_list.append([x_n, y_n])
     return box_list
+    
 
 def update(dt):
     ret, frame = cap.read()
