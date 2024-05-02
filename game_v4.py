@@ -1,6 +1,7 @@
 import pyglet
 import random
 from Read_file import read_csv
+from tracking import tracking
 
 class goalCircle:
     def __init__(self, pos, radius):
@@ -60,7 +61,7 @@ class pointSystem:
 
 class Game():
     def __init__(self):
-        self.new_window = pyglet.window.Window(width=1920, height=1080, caption="Game", resizable=False )
+        self.new_window = pyglet.window.Window(width=1420, height=800, caption="Game", resizable=False )
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
@@ -142,7 +143,7 @@ class Game():
         pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=line_width, color=(2, 189, 20)).draw()
 
         #draw lines between the position pos2 and pos5
-        pyglet.shapes.Line(x=pos2[0], y=pos2[1], x2=pos5[0], y2=pos5[1], width=line_width, color=(2, 189, 20)).draw()
+        pyglet.shapes.Line(x=pos2[0]-8, y=pos2[1], x2=pos5[0]-8, y2=pos5[1], width=line_width, color=(2, 189, 20)).draw()
         
  
         # Draw lines between the position pos1 and pos5
@@ -193,8 +194,14 @@ class Game():
         self.cursor.x = x
         self.cursor.y = y
 
+    def ball_position(self,x, y):
+        self.cursor.x = x
+        self.cursor.y = y
+
     def update(self, dt):
-        #print(self.timer.time_remaining)
+
+        self.ball_position(tracking.center_circles[0][0], tracking.center_circles[0][1])
+
         if self.goalCircles:
             goal = self.goalCircles[0]
 
