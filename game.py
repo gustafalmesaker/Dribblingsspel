@@ -4,7 +4,7 @@ import cv2
 
 #game
 import pyglet
-
+from components import draw_game_field
 window = pyglet.window.Window(width=640, height=640)
 
 
@@ -18,10 +18,15 @@ ret = True
 
 def on_draw(circle_centers):
     window.clear()
+    draw_game_field(window=window)
+
+
     for x , y in circle_centers:
          x = int(window.width * x)
          y = int(window.height * y)
          pyglet.shapes.Circle(x=x, y=y, radius=10, color=(255,255,0)).draw()
+
+    
          
 
 def exit_game():
@@ -59,5 +64,6 @@ pyglet.clock.schedule_interval(update, 1/30.0)
 
 # Start the game loop
 pyglet.app.run()
+
         
     
