@@ -1,21 +1,23 @@
+import pyglet
 from huvudmeny import huvudmeny
 from chooseGame import chooseGame
-import pyglet
 
-def switch_callback(x):
-    if x == 1:
-        huvudmeny()
-    elif x == 2:
-        chooseGame()
-        
-    else:
-        return None  # Handle other cases if needed
+class AppState:
+    def __init__(self):
+        self.current_state = 'menu'  # Initial state
 
-# Base case
-x = 1
+    def run(self):
+        while self.current_state is not None:
+            if self.current_state == 'menu':
+                menu = huvudmeny()
+                self.current_state = menu.run()
+            elif self.current_state == 'game':
+                game = chooseGame()
+                self.current_state = game.run()
+            else:
+                self.current_state = None
 
-# Call the switch_callback function until it returns None
-while x is not None:
-    x = switch_callback(x)
-
-pyglet.app.run()
+if __name__ == "__main__":
+    app = AppState()
+    app.run()
+    pyglet.app.run()

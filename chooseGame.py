@@ -47,32 +47,28 @@ class Timer:
 
 class chooseGame:
 
-    def __init__(self):
+    def __init__(self, state_change_callback=None):
+        self.state_change_callback = state_change_callback
         self.new_window = pyglet.window.Window(width=1200, height=600)
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
-
         self.points = 0
         self.circleButtons = []
         self.create_button()
-
         self.new_window.push_handlers(self)
         pyglet.clock.schedule_interval(self.update, 1/10.0)
-
-        #Images
-
         self.buttons = pyglet.graphics.Batch()
         self.sprites = []
-        x_pos = self.new_window.width*(3/10)
+        x_pos = self.new_window.width * (3/10)
         for i in range(2):
-
             if i == 1:
-                x_pos = self.new_window.width*(7/10)
-
+                x_pos = self.new_window.width * (7/10)
             self.button = pyglet.sprite.Sprite(imgbutton, x_pos, self.new_window.height/2, batch=self.buttons)
-
             self.sprites.append(self.button)
+        self.new_window.set_mouse_visible(False)
+        self.timer = Timer(10.0)
+        pyglet.clock.schedule_interval(self.timer.update, 1/10.0)
 
             
 
@@ -81,6 +77,9 @@ class chooseGame:
         pyglet.clock.schedule_interval(self.timer.update, 1/10.0)
         self.time_rad = 10
 
+    def run(self):
+        pyglet.app.run()
+        
     def draw(self):
 
         
