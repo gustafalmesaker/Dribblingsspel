@@ -4,8 +4,13 @@ import cv2
 
 #game
 import pyglet
-from components import draw_game_field
+
+
+from components import draw_game_field, draw_goals
 window = pyglet.window.Window(width=640, height=640)
+window.set_vsync(False)
+window.push_handlers()
+
 
 
 #detection model
@@ -19,7 +24,7 @@ ret = True
 def on_draw(circle_centers):
     window.clear()
     draw_game_field(window=window)
-
+    #draw_goals(window=window)
 
     for x , y in circle_centers:
          x = int(window.width * x)
@@ -27,8 +32,6 @@ def on_draw(circle_centers):
          pyglet.shapes.Circle(x=x, y=y, radius=10, color=(255,255,0)).draw()
 
     
-         
-
 def exit_game():
     cap.release()  # Release the camera capture device
     pyglet.app.exit()  # Terminate the Pyglet application

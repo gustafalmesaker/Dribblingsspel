@@ -1,4 +1,7 @@
 import pyglet
+from read_file import read_csv
+import random
+
 
 def draw_game_field(window):
     line_width = 15
@@ -43,3 +46,65 @@ def draw_game_field(window):
     pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=(2, 189, 20)).draw()
     pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=(2, 189, 20)).draw()
     pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=(2, 189, 20)).draw()
+
+
+
+def draw_goals(window):
+    #random number between 1 and 11
+    hash = random.randint(0, 10)
+    exercises, positions_from_file = read_csv('exercise_positions.csv')
+
+    print("New hash: ", hash)
+
+    pos1 = (150, window.height-150)
+    pos2 = (window.width//2, window.height-150)
+    pos3 = (window.width-150, window.height-150)
+
+    pos4 = (150, 150)
+    pos5 = (window.width//2, 150)
+    pos6 = (window.width-150, 150)
+
+
+    for position in positions_from_file[hash]:
+        #print("entered for loop")
+        #print(position)
+
+        if position == "1":
+            add_goal(pos1)
+        elif position == "2":
+            add_goal(pos2)
+        elif position == "3":
+            add_goal(pos3)
+        elif position == "4":
+            add_goal(pos4)
+        elif position == "5":
+            add_goal(pos5)
+        elif position == "6":
+            add_goal(pos6)
+        else:
+            pass
+    
+    goal_circles = []
+
+    if goal_circles:
+        goal = goal_circles[0]
+        # Outer circle of goal
+        pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
+        pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
+
+        # Inner circle of goal
+        pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
+        pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
+        
+
+    def add_goal(pos):
+        goal = Goal_Circle(pos)
+        Goal_Circle.append(goal)
+
+    class Goal_Circle:
+        def __init__(self, pos):
+            self.x, self.y = pos
+            self.radius = 50
+            self.inner_radius = self.radius-5
+            self.color = (2, 189, 20, 255)
+            self.inner_color = (50,205,50)
