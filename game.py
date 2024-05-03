@@ -6,10 +6,10 @@ import cv2
 import pyglet
 
 
-from components import draw_game_field, draw_goals
+from components import draw_game_field, Goal
 window = pyglet.window.Window(width=640, height=640)
-window.set_vsync(False)
-window.push_handlers()
+#window.set_vsync(False)
+#window.push_handlers()
 
 
 
@@ -18,20 +18,24 @@ window.push_handlers()
 ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
 #model = YOLO("yolov8n.pt") #load pretrained model
 
+
+
 cap = cv2.VideoCapture(1)
 ret = True
 
-def on_draw(circle_centers):
+goal = Goal()
+
+
+def on_draw(circle_centers, goal):
     window.clear()
     draw_game_field(window=window)
-    #draw_goals(window=window)
-
+    
     for x , y in circle_centers:
          x = int(window.width * x)
          y = int(window.height * y)
          pyglet.shapes.Circle(x=x, y=y, radius=10, color=(255,255,0)).draw()
+    goal.draw()
 
-    
 def exit_game():
     cap.release()  # Release the camera capture device
     pyglet.app.exit()  # Terminate the Pyglet application
@@ -47,6 +51,7 @@ def center_points(results):
               if obj.cls == sports_ball_id:
                    x_n, y_n, w, h = obj.xywhn[0].tolist()
                    box_list.append([x_n, y_n])
+                   
     return box_list
     
 
@@ -58,7 +63,8 @@ def update(dt):
     results = ov_model.track(frame, persist=True)
     if results[0] is not None:
             circle_centers = center_points(results=results)
-            on_draw(circle_centers=circle_centers)
+            goal.update(dt=dt)
+            on_draw(circle_centers=circle_centers, goal=goal)
     
 
 

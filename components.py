@@ -108,3 +108,31 @@ def draw_goals(window):
             self.inner_radius = self.radius-5
             self.color = (2, 189, 20, 255)
             self.inner_color = (50,205,50)
+
+
+class Goal:
+    def __init__(self):
+        self.radius = 25
+        self.color = (0, 255, 0)  # Initial color (green)
+        self.life_span = 100 
+        self.spawn_new_goal()
+        
+    def spawn_new_goal(self):
+        # Randomly choose one of six positions across the screen
+        self.x = random.choice([640 // 6 * i for i in range(1, 7)])
+        self.y = random.randint(self.radius, 640 - self.radius)
+        
+        
+    def update(self, dt):
+        self.life_span = self.life_span - 1
+        if self.life_span < 0:
+            # If the goal has turned completely red, spawn a new one
+            self.spawn_new_goal()
+        
+        interpolation = min(1, self.life_span / 100)
+        red_value = int(255 * interpolation)
+        self.color = (255 - red_value, red_value, 0)  # Gradually shifts from green to red
+
+    def draw(self):
+        # Draw the goal on the screen
+        pyglet.shapes.Circle(self.x, self.y, self.radius, color=self.color).draw()
