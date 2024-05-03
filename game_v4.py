@@ -1,6 +1,52 @@
 import pyglet
 import random
 from Read_file import read_csv
+from ultralytics import YOLO
+import cv2
+#from soundtrack import play_sound
+
+
+ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
+
+cap = cv2.VideoCapture(1)
+ret = True
+
+sound_effect = pyglet.resource.media("soundtrack/meny_music.mp3")
+sound_effect.play()
+
+class tracking:
+    def __init__(self):
+        self.circle_pos_x = 600
+        self.circle_pos_y = 600
+
+    #find where sports balls are located (id 32)
+    def center_points(self,results):
+        box_list = []
+        sports_ball_id = 32
+        #sports_ball_id = 67
+
+        if results[0].boxes.xyxy is not None:
+            for obj in results[0].boxes:
+                if obj.cls == sports_ball_id:
+                    x_n, y_n, w, h = obj.xywhn[0].tolist()
+                    box_list.append([x_n, y_n])
+        return box_list
+        
+
+    def update_pos(self):
+        ret, frame = cap.read()
+
+        frame = cv2.resize(frame , (1420 , 800), interpolation=cv2.INTER_LINEAR)
+        results = ov_model.track(frame, persist=True)
+
+        if results[0] is not None:
+            pos = self.center_points(results)
+            if pos != []:
+                self.circle_pos_x,self.circle_pos_y = pos[0]
+        else:
+            self.circle_pos_x = self.circle_pos_x
+            self.circle_pos_y = self.circle_pos_y      
+
 
 class goalCircle:
     def __init__(self, pos, radius):
@@ -50,6 +96,9 @@ class pointSystem:
 
     def update_streak(self):
         self.streak += 1
+        sound_effect = pyglet.resource.media("soundtrack/nice_shot.mp3")
+        sound_effect.play()
+
 
     def reset_points(self):
         self.points = 0
@@ -60,30 +109,34 @@ class pointSystem:
 
 class Game():
     def __init__(self):
-        self.new_window = pyglet.window.Window(width=1420, height=800, caption="Game", resizable=False )
-        self.new_window.set_vsync(False)
+        config = pyglet.gl.Config(double_buffer=True, depth_size=24)
+        self.new_window = pyglet.window.Window(width=1420, height=800, caption="Game", vsync=False, config=config )
+        #self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
         
+
         # Read data from the CSV file
         self.exercises, self.positions_from_file = read_csv('exercise_positions.csv')
         self.hash = 0
         self.goalCircles = []
 
-
         self.counter = 0    # counts how many goals have been reached, and is used to determine the shrink rate (starts at 0)
 
         self.point_system = pointSystem() # Create a point system object
+
+        self.tracking = tracking()
 
         self.new_window.push_handlers(self)
 
         self.new_window.set_mouse_visible(False)
 
+
     def initial_position(self):
          #random number between 1 and 11
         self.hash = random.randint(0, 10)
 
-        print("New hash: ", self.hash)
+        #print("New hash: ", self.hash)
 
         pos1 = (150, self.new_window.height-150)
         pos2 = (self.new_window.width//2, self.new_window.height-150)
@@ -118,6 +171,8 @@ class Game():
         line_width = 15
         dot_radius = 25
 
+        fieldL = []
+        fieldB = pyglet.graphics.Batch()
 
         pos1 = (150, self.new_window.height-150)
         pos2 = (self.new_window.width//2, self.new_window.height-150)
@@ -128,61 +183,63 @@ class Game():
         pos6 = (self.new_window.width-150, 150)
 
         #draw outer rectangle
-        pyglet.shapes.Rectangle(x=0, y=0, width=self.new_window.width, height=self.new_window.height, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Rectangle(x=0, y=0, width=self.new_window.width, height=self.new_window.height, color=(2, 189, 20), batch = fieldB))
         #draw inner rectangle
-        pyglet.shapes.Rectangle(x=10, y=10, width=self.new_window.width-20, height=self.new_window.height-20, color=(0, 0, 0)).draw()
-
+        fieldL.append(pyglet.shapes.Rectangle(x=10, y=10, width=self.new_window.width-20, height=self.new_window.height-20, color=(0, 0, 0),batch=fieldB))
         # Draw lines between the position pos1 and pos3
-        pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20), batch=fieldB))
         # Draw lines between the position pos3 and pos6
-        pyglet.shapes.Line(x=pos3[0], y=pos3[1], x2=pos6[0], y2=pos6[1], width=line_width, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Line(x=pos3[0], y=pos3[1], x2=pos6[0], y2=pos6[1], width=line_width, color=(2, 189, 20), batch=fieldB))
         # Draw lines between the position pos6 and pos4
-        pyglet.shapes.Line(x=pos6[0], y=pos6[1], x2=pos4[0], y2=pos4[1], width=line_width, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Line(x=pos6[0], y=pos6[1], x2=pos4[0], y2=pos4[1], width=line_width, color=(2, 189, 20), batch=fieldB))
         # Draw lines between the position pos4 and pos1
-        pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=line_width, color=(2, 189, 20)).draw()
-
+        fieldL.append(pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=line_width, color=(2, 189, 20), batch=fieldB))
         #draw lines between the position pos2 and pos5
-        pyglet.shapes.Line(x=pos2[0]-8, y=pos2[1], x2=pos5[0]-8, y2=pos5[1], width=line_width, color=(2, 189, 20)).draw()
-        
+        fieldL.append(pyglet.shapes.Line(x=pos2[0]-8, y=pos2[1], x2=pos5[0]-8, y2=pos5[1], width=line_width, color=(2, 189, 20),batch=fieldB))
  
         # Draw lines between the position pos1 and pos5
-        pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=line_width, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=line_width, color=(2, 189, 20),batch=fieldB))
         # Draw lines between the position pos5 and pos3
-        pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20),batch=fieldB))
 
         #draw dots at the positions
-        pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=dot_radius, color=(2, 189, 20)).draw()
-        pyglet.shapes.Circle(x=pos2[0], y=pos2[1], radius=dot_radius, color=(2, 189, 20)).draw()
-        pyglet.shapes.Circle(x=pos3[0], y=pos3[1], radius=dot_radius, color=(2, 189, 20)).draw()
-        pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=(2, 189, 20)).draw()
-        pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=(2, 189, 20)).draw()
-        pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=(2, 189, 20)).draw()
+        fieldL.append(pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos2[0], y=pos2[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos3[0], y=pos3[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldB.draw()
 
           
 
     def draw(self):
         # Draw the field
         self.field()
+        drawL= []
+        drawB = pyglet.graphics.Batch()
+
         # Draw the first goal in the list
         if self.goalCircles:
             goal = self.goalCircles[0]
             # Outer circle of goal
-            pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color).draw()
-            pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0)).draw()
+            drawL.append(pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius, color=goal.color, batch=drawB))
+            drawL.append(pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.radius-5, color=(0, 0, 0),batch=drawB))
 
             # Inner circle of goal
-            pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color).draw()
-            pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0)).draw()
+            drawL.append(pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius, color=goal.inner_color, batch=drawB))
+            drawL.append(pyglet.shapes.Circle(x=goal.x, y=goal.y, radius=goal.inner_radius-5, color=(0, 0, 0), batch=drawB))
             
 
         # Cursor
-        pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
+        drawL.append(pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius, batch=drawB))
 
         #Points display in top midde of screen
-        pyglet.text.Label("Points: " + str(self.point_system.points), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 -100, y=self.new_window.height-50, anchor_x='center').draw()
+        drawL.append(pyglet.text.Label("Points: " + str(self.point_system.points), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 -100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
 
         #Streak display next to points
-        pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center').draw()
+        drawL.append(pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
+        drawB.draw()
 
     def on_draw(self):
         self.new_window.clear()
@@ -195,10 +252,13 @@ class Game():
 
     def ball_position(self,x,y):
         #print(x, y)
-        self.cursor.x = self.new_window.width * x
+        self.cursor.x = (self.new_window.width * (1-x))
         self.cursor.y = self.new_window.height * y
 
     def update(self, dt):
+
+        self.tracking.update_pos()
+        self.ball_position(self.tracking.circle_pos_x,self.tracking.circle_pos_y)
 
         if self.goalCircles:
             goal = self.goalCircles[0]
@@ -233,7 +293,7 @@ class Game():
 
         # Calculate the ratio of inner radius to outer radius   (goes from 0 to 1 as inner radius decreases)
         ratio = (goal.inner_radius+5) / goal.radius
-        print(ratio)
+        #print(ratio)
 
         # Interpolate color gradually from green to red based on the ratio
         goal.inner_color = (
@@ -254,5 +314,7 @@ class Game():
 
 # if __name__ == "__main__":
 #     game = Game()
-#     pyglet.app.run(interval=1/120.0)
+#     pyglet.clock.schedule_interval(game.update, 1.0/ 120.0)
+
+#     pyglet.app.run()
 
