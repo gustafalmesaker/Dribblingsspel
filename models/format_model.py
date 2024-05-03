@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 
-model = YOLO('models\model_v1.1.pt')
+model = YOLO('final_model.pt')
 #model.export(format='onnx')
 model.export(format='openvino')
 
