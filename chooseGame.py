@@ -8,8 +8,9 @@ imgbutton = pyglet.image.load('Assets/150px.png')
 imgbutton.anchor_x = imgbutton.width // 2
 imgbutton.anchor_y = imgbutton.height // 2
 
-imgbutton.width = imgbutton.width
-imgbutton.height = imgbutton.height
+imgbutton2 = pyglet.image.load('Assets/backbutton.png')
+imgbutton2.anchor_x = imgbutton.width // 2
+imgbutton2.anchor_y = imgbutton.height // 2
 
 
 
@@ -21,8 +22,6 @@ class circleButton:
         self.outer_radius = radius-5
         self.color = (22,37,33,255)
         self.outer_color = (22,37,33,255)
-
-    
 
 class cursor:
     def __init__(self, x, y, radius):
@@ -39,14 +38,11 @@ class Timer:
         self.time_remaining -= dt
         if self.time_remaining <= 0:
             self.reset()
-        #print(self.time_remaining)
 
     def reset(self):
         self.time_remaining = self.duration
 
-
 class chooseGame:
-
     def __init__(self):
         self.new_window = pyglet.window.Window(width=1200, height=600)
         self.new_window.set_vsync(False)
@@ -60,21 +56,31 @@ class chooseGame:
         self.new_window.push_handlers(self)
         pyglet.clock.schedule_interval(self.update, 1/10.0)
 
-        #Images
-
+        # Images
         self.buttons = pyglet.graphics.Batch()
         self.sprites = []
         x_pos = self.new_window.width*(3/10)
-        for i in range(2):
-
+        for i in range(3):
             if i == 1:
                 x_pos = self.new_window.width*(7/10)
 
-            self.button = pyglet.sprite.Sprite(imgbutton, x_pos, self.new_window.height/2, batch=self.buttons)
-
+            self.button = pyglet.sprite.Sprite(imgbutton, x_pos, self.new_window.height*0.4, batch=self.buttons)
             self.sprites.append(self.button)
 
+            if i == 2:
+                x_pos = self.new_window.width*(3/20)
+                self.button = pyglet.sprite.Sprite(imgbutton2, x_pos, self.new_window.height*(24/25), batch=self.buttons)
+                self.sprites.append(self.button)
             
+           
+
+
+
+            
+
+        
+
+        
 
         self.new_window.set_mouse_visible(False)
         self.timer = Timer(10.0)
@@ -82,37 +88,34 @@ class chooseGame:
         self.time_rad = 10
 
     def draw(self):
-
-        
         for button in self.circleButtons:
-
-            # outer circle of button
+            # Outer circle of button
             if (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2 <= (button.radius - self.cursor.radius)**2:
                 pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.outer_radius, color=button.outer_color).draw()
                 pyglet.shapes.Circle(x=button.x, y=button.y, radius=button.outer_radius-5, color=(22,37,33,255)).draw()
-         
-        
+            
+        # Draw other buttons
+        self.buttons.draw() 
+
         # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
+
 
     def on_draw(self):
         self.new_window.clear()
         
-        #Bake border for background
+        # Background
         border = pyglet.image.SolidColorImagePattern((2,189,20,255)).create_image(self.new_window.width, self.new_window.height)
         border.blit(0,0)
 
-        #Background color
+        # Background color
         background = pyglet.image.SolidColorImagePattern((22,37,33,255)).create_image(self.new_window.width-20, self.new_window.height-20)
         background.blit(10,10)
 
-        
+        # Draw buttons
         self.draw()
 
-        #Draw button from png
-        
-        self.buttons.draw() 
-
+        # Title
         titel = pyglet.text.Label('Välj spel',
                           font_name='Bebas',
                           font_size=75,
@@ -127,59 +130,51 @@ class chooseGame:
         self.cursor.y = y
 
     def update(self, dt):
-        #print(self.timer.time_remaining)
         for button in self.circleButtons:
-            # button is made smaller when cursor is inside the button circle
-            
+            # Button is made smaller when cursor is inside the button circle
             if (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2 <= (button.radius - self.cursor.radius)**2:
                 self.animate_button(button,dt)  # Animate the button circle
-                 # Create a new button
+                # Create a new button
                 self.points = 20
             else:
                 button.outer_radius = button.radius + 30
                 button.outer_color = (2,189,20,255)
-                
-
-            
+        
                 
     def create_button(self):
-        for i in range (2):
-            
-            x = self.new_window.width*(3/10)    
-            
-            if i == 1:
-                x = self.new_window.width*(7/10)
-                
+        for i in range (3):
 
-            y = self.new_window.height/2
-            radius = 150
+            if i == 0:
+                x = self.new_window.width*(3/10)
+                y = self.new_window.height
+                radius = 2*150
+
+            elif i == 1:
+                x = self.new_window.width*(7/10)
+                y = self.new_window.height
+                radius = 2*150
+
+            elif i == 2:
+                x = self.new_window.width*(3/34)
+                y = self.new_window.height*(0.835/0.4)
+                radius = 150
+
+
+            y = y*0.4
+            radius = radius/2
             button = circleButton(x, y, radius)
             self.circleButtons.append(button)
+        
 
+        
 
-        radius = 150
-        button = circleButton(x, y, radius)
-        self.circleButtons.append(button)
     
     def animate_button(self,button,dt):
-
         if self.points/10 < 8:
-            button.outer_radius -=self.points/10 # button is made smaller every frame
+            button.outer_radius -=self.points/10 # Button is made smaller every frame
         else:
-            button.outer_radius -= 8    
+            button.outer_radius -= 8
 
-        #if button.outer_radius <= button.radius/4:
-            #button.outer_color = (255,0,0, 200)       # Change color of outer circle when it is less than 1/4 of the button circle (red)
-
-        #elif button.outer_radius <= button.radius/2:
-            #button.outer_color = (255,165,0, 200)      # Change color of outer circle when it is less than 1/2 of the button circle (orange)
-
-
-        # if button.radius == button.outer_radius:                # If button is completely gone, remove it and create a new button
-        #     self.circleButtons.remove(button)
-        #     #self.add_new_button(button)
-        #     self.timer.reset()
-    
-
-
-
+if __name__ == "__main__":
+    chooseGame = chooseGame()
+    pyglet.app.run()
