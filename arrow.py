@@ -4,7 +4,6 @@ from re import X
 import pyglet
 from pyglet import app, shapes
 from pyglet.window import key
-import time
 import random
 import math
 from pyglet import image
@@ -56,9 +55,6 @@ done_text = pyglet.text.Label('DONE',
                             color=(0, 255, 0, 255))
 #----------------------------------------------------------------------------#
 line_batch = pyglet.graphics.Batch()
-temp = pyglet.graphics.Batch()
-
-
 
 #--------------------------------- ARROWS -----------------------------------#
 #--- START ARROW ---#
@@ -74,32 +70,43 @@ temp = pyglet.graphics.Batch()
 # triangle_progress = x4
 # triangle = pyglet.shapes.Triangle(x2, y2, triangle_progress, y1, x3, y3, color=(255, 0, 0, 100), batch=line_batch)
 
-
 #RIGHTIE
-x1_r, y1_r = width-200, height//2   # P1
-x2_r, y2_r = x1_r-150, y1_r+100         # P2
-x3_r, y3_r = x1_r-150, y1_r-100         # P3
-x4_r, y4_r = x1_r-150, y1_r-50          # P4    
-x5_r, y5_r = x1_r-150, y1_r+50          # P5
-x6_r, y6_r = x1_r-450, y1_r-50          # P6
-x7_r, y7_r = x1_r-450, y1_r+50          # P7
+x1, y1 = width-200, height//2   # P1
+x2, y2 = x1-150, y1+100         # P2
+x3, y3 = x1-150, y1-100         # P3
+x4, y4 = x1-150, y1-50          # P4    
+x5, y5 = x1-150, y1+50          # P5
+x6, y6 = x1-450, y1-50          # P6
+x7, y7 = x1-450, y1+50          # P7
 direction = "right"
 
-# Anchor point
-ox, oy = x6_r, y6_r
-rot_angle = math.radians(45)
+# *-------------------* #
+# RIGHTIE ROTATED
+# x1_r, y1_r = width-200, height//2   # P1
+# x2_r, y2_r = x1_r-150, y1_r+100         # P2
+# x3_r, y3_r = x1_r-150, y1_r-100         # P3
+# x4_r, y4_r = x1_r-150, y1_r-50          # P4    
+# x5_r, y5_r = x1_r-150, y1_r+50          # P5
+# x6_r, y6_r = x1_r-450, y1_r-50          # P6
+# x7_r, y7_r = x1_r-450, y1_r+50          # P7
+# direction = "right"
 
-# Rotation
-x1, y1 = ox + math.cos(rot_angle) * (x1_r - ox) - math.sin(rot_angle) * (y1_r - oy), oy + math.sin(rot_angle) * (x1_r - ox) + math.cos(rot_angle) * (y1_r - oy)
-x2, y2 = ox + math.cos(rot_angle) * (x2_r - ox) - math.sin(rot_angle) * (y2_r - oy), oy + math.sin(rot_angle) * (x2_r - ox) + math.cos(rot_angle) * (y2_r - oy)
-x3, y3 = ox + math.cos(rot_angle) * (x3_r - ox) - math.sin(rot_angle) * (y3_r - oy), oy + math.sin(rot_angle) * (x3_r - ox) + math.cos(rot_angle) * (y3_r - oy)
-x4, y4 = ox + math.cos(rot_angle) * (x4_r - ox) - math.sin(rot_angle) * (y4_r - oy), oy + math.sin(rot_angle) * (x4_r - ox) + math.cos(rot_angle) * (y4_r - oy)
-x5, y5 = ox + math.cos(rot_angle) * (x5_r - ox) - math.sin(rot_angle) * (y5_r - oy), oy + math.sin(rot_angle) * (x5_r - ox) + math.cos(rot_angle) * (y5_r - oy)
-x6, y6 = ox + math.cos(rot_angle) * (x6_r - ox) - math.sin(rot_angle) * (y6_r - oy), oy + math.sin(rot_angle) * (x6_r - ox) + math.cos(rot_angle) * (y6_r - oy)
-x7, y7 = ox + math.cos(rot_angle) * (x7_r - ox) - math.sin(rot_angle) * (y7_r - oy), oy + math.sin(rot_angle) * (x7_r - ox) + math.cos(rot_angle) * (y7_r - oy)
+# Anchor point
+# ox, oy = x6_r, y6_r
+# rot_angle = math.radians(45)
+
+# Rotation kinda works, not really
+# x1, y1 = ox + math.cos(rot_angle) * (x1_r - ox) - math.sin(rot_angle) * (y1_r - oy), oy + math.sin(rot_angle) * (x1_r - ox) + math.cos(rot_angle) * (y1_r - oy)
+# x2, y2 = ox + math.cos(rot_angle) * (x2_r - ox) - math.sin(rot_angle) * (y2_r - oy), oy + math.sin(rot_angle) * (x2_r - ox) + math.cos(rot_angle) * (y2_r - oy)
+# x3, y3 = ox + math.cos(rot_angle) * (x3_r - ox) - math.sin(rot_angle) * (y3_r - oy), oy + math.sin(rot_angle) * (x3_r - ox) + math.cos(rot_angle) * (y3_r - oy)
+# x4, y4 = ox + math.cos(rot_angle) * (x4_r - ox) - math.sin(rot_angle) * (y4_r - oy), oy + math.sin(rot_angle) * (x4_r - ox) + math.cos(rot_angle) * (y4_r - oy)
+# x5, y5 = ox + math.cos(rot_angle) * (x5_r - ox) - math.sin(rot_angle) * (y5_r - oy), oy + math.sin(rot_angle) * (x5_r - ox) + math.cos(rot_angle) * (y5_r - oy)
+# x6, y6 = ox + math.cos(rot_angle) * (x6_r - ox) - math.sin(rot_angle) * (y6_r - oy), oy + math.sin(rot_angle) * (x6_r - ox) + math.cos(rot_angle) * (y6_r - oy)
+# x7, y7 = ox + math.cos(rot_angle) * (x7_r - ox) - math.sin(rot_angle) * (y7_r - oy), oy + math.sin(rot_angle) * (x7_r - ox) + math.cos(rot_angle) * (y7_r - oy)
+# *-------------------* #
 
 triangle_progress = x4
-triangle = pyglet.shapes.Triangle(x2, y2, triangle_progress, y1, x3, y3, color=(255, 0, 0, 100), batch=temp)
+triangle = pyglet.shapes.Triangle(x2, y2, triangle_progress, y1, x3, y3, color=(255, 0, 0, 100), batch=line_batch)
 
 # UP
 # x1, y1 = width//2, height-150 # P1
@@ -112,7 +119,6 @@ triangle = pyglet.shapes.Triangle(x2, y2, triangle_progress, y1, x3, y3, color=(
 # direction = "up"
 # triangle_progress = y4
 # triangle = pyglet.shapes.Triangle(x2, y2, x1, triangle_progress, x3, y3, color=(255, 0, 0, 100), batch=line_batch)
-
 
 # DOWN
 # x1, y1 = width//2, height-600   # P1
@@ -132,25 +138,17 @@ line3 = shapes.Line(x2, y2, x3, y3, 5, GREEN, batch=line_batch) # Triangle botto
 line4 = shapes.Line(x4, y4, x6, y6, 5, GREEN, batch=line_batch)  # Left side rect
 line5 = shapes.Line(x5, y5, x7, y7, 5, GREEN, batch=line_batch)  # Right side rect
 line6 = shapes.Line(x6, y6, x7, y7, 5, ORANGE, batch=line_batch)  # Entry line
-loading_bar = pyglet.shapes.Rectangle(x6, y6, 100, 100, color=(255, 0, 0, 100), batch=line_batch)  # Horizontal arrow
-loading_bar.rotation = -math.degrees(rot_angle)
+loading_bar = pyglet.shapes.Rectangle(x6, y6, 0, 100, color=(255, 0, 0, 100), batch=line_batch)  # Horizontal arrow
 
-# mid_x, mid_y = abs(x6+x7)/2, abs(y6+y7)/2
-# prog_x, prog_y = mid_x, mid_y
-# loading_bar = shapes.Line(mid_x, mid_y, prog_x, prog_y, 100, color=(255, 0, 0, 100), batch=line_batch)
-# loading_bar.rotation = rot_angle
-# loading_bar = pyglet.shapes.Rectangle(x6, y6, 100, 0, color=(255, 0, 0, 100), batch=line_batch)  # Vertical arrow
+#loading_bar.rotation = -math.degrees(rot_angle)
 
 last_progressed_position_x = x6
 last_progressed_position_y = y6
 
-hit_box_line1 = pyglet.shapes.Line(x6, y6, x4, y4, 2, RED, batch=line_batch)
-hit_box_line2 = pyglet.shapes.Line(x7, y7, x5, y5, 2, RED, batch=line_batch)
-hit_box_line3 = pyglet.shapes.Line(x5, y5, x4, y4, 2, RED, batch=line_batch)    
+# hit_box_line1 = pyglet.shapes.Line(x6, y6, x4, y4, 2, RED, batch=line_batch)
+# hit_box_line2 = pyglet.shapes.Line(x7, y7, x5, y5, 2, RED, batch=line_batch)
+# hit_box_line3 = pyglet.shapes.Line(x5, y5, x4, y4, 2, RED, batch=line_batch)    
 
-# box
-#box = pyglet.shapes.BorderedRectangle(x6, y6, 300, 100, 10, border_color=GREEN, batch=temp)
-#box.rotation = 45
 
 #--- ARROWS DEFINITIONS ---#
 # LEFT 
@@ -238,9 +236,9 @@ def draw_figure():
     line5 = shapes.Line(x5, y5, x7, y7, 5, GREEN, batch=line_batch)     # Right side rect
     line6 = shapes.Line(x6, y6, x7, y7, 5, ORANGE, batch=line_batch)    # Entry line
 
-    hit_box_line1 = pyglet.shapes.Line(x6, y6, x1, y6, 2, RED, batch=line_batch)
-    hit_box_line2 = pyglet.shapes.Line(x7, y7, x1, y7, 2, RED, batch=line_batch)
-    hit_box_line3 = pyglet.shapes.Line(x1, y6, x1, y7, 2, RED, batch=line_batch)    
+    # hit_box_line1 = pyglet.shapes.Line(x6, y6, x1, y6, 2, RED, batch=line_batch)
+    # hit_box_line2 = pyglet.shapes.Line(x7, y7, x1, y7, 2, RED, batch=line_batch)
+    # hit_box_line3 = pyglet.shapes.Line(x1, y6, x1, y7, 2, RED, batch=line_batch)    
  
     if (direction == "right" or direction == "left"):
         loading_bar = pyglet.shapes.Rectangle(x6, y6, 0, 100, color=(255, 0, 0, 100), batch=line_batch)
@@ -263,13 +261,28 @@ done = False
 def check_inside(x, y):
     global inside
 
-    # pythogoras theorem
-    x_
+    # *** FOR ROTATION *** #
+    # low_delta_x = x6-x4
+    # low_delta_y = y6-y4
 
+    # if low_delta_x == 0 or low_delta_y == 0:
+    #     k = 1
+    # else:
+    #     k = low_delta_x / low_delta_y # same for both
+    
+    # m_low = y6 - k*x6
+    # m_up = y7 - k*x7
+    
+    # x_low = abs((y-m_low)/k)
+    # x_up = abs((y-m_up)/k)
+    # y_low = abs(k*x + m_low)
+    # y_up = abs(k*x + m_up)
 
+    #if (direction == "right" or direction == "left") and (x >= min(x_low, x_up) and x <= max(x_low, x_up)) and (y >= min(y_low, y_up) and y <= max(y_low, y_up)):
+    # *** ------------ *** #
     if (direction == "right" or direction == "left") and (x >= min(x1, x6) and x <= max(x1, x6)) and (y >= min(y6, y7) and y <= max(y6, y7)):
         inside = True
-    elif (direction == "up" or direction == "down") and (x >= min(x6, x7) and x <= max(x6, x7)) and (y >= min(y1, y6) and y <= max(y1, y6)):
+    elif (direction == "up" or direction == "down") and (x >= min(x6, x7) and x <= max(x6, x7)) and (y >= min(y6, y1) and y <= max(y6, y1)):
         inside = True
     else:
         inside = False
@@ -326,9 +339,6 @@ def update_loading_bar(x, y, direction):
             loading_bar.width = max(0, min(x - x6, 300))
             last_progressed_position_x = x 
 
-            # loading_bar.x2 = x
-            # loading_bar.y2 = y
-
             # TEXT #
             progress = abs(last_progressed_position_x - x6)/3
             loading_bar_width_text.text = 'PROGRESS: {:.1f}'.format(progress)
@@ -342,7 +352,6 @@ def update_loading_bar(x, y, direction):
 
             if triangle_progress >= x1 - 5:
                 done = True
-            #print("triangle_progress: ", triangle_progress)
         #----------#
 
         #--- UP ---#
@@ -586,17 +595,15 @@ def on_draw():
     line_batch.draw()
     loading_bar.draw()
     points_label.draw() 
-    #pic_sprite.draw()
-    #temp.draw()
 
     #--- DEBUG ---#
     # RESET BUTTON
     button_shape.draw()
     reset_text.draw()
-    #direction_text.draw()
+    direction_text.draw()
 
     cursor_position_text.draw()
-    #loading_bar_width_text.draw()
+    loading_bar_width_text.draw()
     point_batch.draw()
 
     if entered_correctly:
