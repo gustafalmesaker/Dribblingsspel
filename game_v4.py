@@ -3,16 +3,20 @@ import random
 from Read_file import read_csv
 from ultralytics import YOLO
 import cv2
+import math
 #from soundtrack import play_sound
 
 
-ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
+ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvino model
 
 cap = cv2.VideoCapture(1)
 ret = True
-
-sound_effect = pyglet.resource.media("soundtrack/meny_music.mp3")
-sound_effect.play()
+#================ Sounds =================
+sound_music = pyglet.resource.media("soundtrack/meny_music.mp3")
+sound_goal = pyglet.resource.media("soundtrack/goal.mp3")
+sound_streak = pyglet.resource.media("soundtrack/streak.mp3")
+sound_music.play()
+#=========================================
 
 class tracking:
     def __init__(self):
@@ -23,13 +27,17 @@ class tracking:
     def center_points(self,results):
         box_list = []
         sports_ball_id = 32
-        #sports_ball_id = 67
+        person_id = 0
 
         if results[0].boxes.xyxy is not None:
             for obj in results[0].boxes:
                 if obj.cls == sports_ball_id:
                     x_n, y_n, w, h = obj.xywhn[0].tolist()
                     box_list.append([x_n, y_n])
+
+                # elif obj.cls == person_id:
+                #     x_n, y_n, w, h = obj.xywhn[0].tolist()
+                #     box_list.append([x_n, y_n])
         return box_list
         
 
@@ -96,8 +104,10 @@ class pointSystem:
 
     def update_streak(self):
         self.streak += 1
-        sound_effect = pyglet.resource.media("soundtrack/nice_shot.mp3")
-        sound_effect.play()
+        if self.streak in [10, 15, 25, 50, 100]:
+            sound_streak.play()
+        else: 
+            sound_goal.play()
 
 
     def reset_points(self):
@@ -126,6 +136,7 @@ class Game():
         self.point_system = pointSystem() # Create a point system object
 
         self.tracking = tracking()
+        self.trackcounter = 0
 
         self.new_window.push_handlers(self)
 
@@ -252,13 +263,18 @@ class Game():
 
     def ball_position(self,x,y):
         #print(x, y)
-        self.cursor.x = (self.new_window.width * (1-x))
-        self.cursor.y = self.new_window.height * y
+        self.cursor.x = (self.new_window.width * (1-x)*1.2)
+        self.cursor.y = self.new_window.height * y * 1.2
 
     def update(self, dt):
 
-        self.tracking.update_pos()
-        self.ball_position(self.tracking.circle_pos_x,self.tracking.circle_pos_y)
+        if self.trackcounter % 3 == 0:
+            self.tracking.update_pos()
+            self.ball_position(self.tracking.circle_pos_x,self.tracking.circle_pos_y)
+
+        self.trackcounter += 1
+
+        
 
         if self.goalCircles:
             goal = self.goalCircles[0]
