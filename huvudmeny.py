@@ -2,6 +2,7 @@ import pyglet
 from pyglet import font
 
 
+
 font.add_file('Assets/bebas/Bebas-Regular.ttf')
 Bebas = font.load('Bebas', 16)
 
@@ -50,41 +51,61 @@ class Timer:
 
 class huvudmeny:
 
-    def __init__(self, switch_callback):
-        self.switch_callback = switch_callback
+    def __init__(self, state_change_callback=None):
+        self.state_change_callback = state_change_callback
         self.new_window = pyglet.window.Window(width=1200, height=600)
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
-
         self.points = 0
         self.circleButtons = []
         self.create_button()
-        self.x = 1
-
         self.new_window.push_handlers(self)
         pyglet.clock.schedule_interval(self.update, 1/10.0)
-
-        #Images
-
         self.buttons = pyglet.graphics.Batch()
         self.sprites = []
-        x_pos = self.new_window.width*(3/10)
+        x_pos = self.new_window.width * (3/10)
         for i in range(2):
-
             if i == 1:
-                x_pos = self.new_window.width*(7/10)
-
+                x_pos = self.new_window.width * (7/10)
             self.button = pyglet.sprite.Sprite(imgbutton, x_pos, self.new_window.height/2, batch=self.buttons)
-
             self.sprites.append(self.button)
-
-            
-
         self.new_window.set_mouse_visible(False)
         self.timer = Timer(10.0)
         pyglet.clock.schedule_interval(self.timer.update, 1/10.0)
-        self.time_rad = 10
+
+    def run(self):
+        pyglet.app.run()
+
+                
+    def update(self, dt):
+        hovered = False  # Track if any button is hovered
+        for button in self.circleButtons:
+            # Calculate distance squared from cursor to button center
+            distance_squared = (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2
+            if distance_squared <= button.radius**2:
+                hovered = True
+                button.outer_radius = button.radius + 10  # Example of visual feedback
+                button.outer_color = (255, 0, 0, 255)  # Change color to red on hover
+            else:
+                button.outer_radius = button.radius
+                button.outer_color = (22, 37, 33, 255)  # Reset color when not hovered
+
+        if hovered:
+            if self.state_change_callback:
+                self.state_change_callback('game')
+
+    def on_draw(self):
+        self.new_window.clear()
+        border = pyglet.image.SolidColorImagePattern((2,189,20,255)).create_image(self.new_window.width, self.new_window.height)
+        border.blit(0, 0)
+        background = pyglet.image.SolidColorImagePattern((22,37,33,255)).create_image(self.new_window.width-20, self.new_window.height-20)
+        background.blit(10, 10)
+        self.draw()
+        self.buttons.draw()
+        titel = pyglet.text.Label('Project Mbappe', font_name='Bebas', font_size=75, x=self.new_window.width//2, y=self.new_window.height*(0.85), anchor_x='center', anchor_y='center')
+        titel.draw()
+        self.fps_display.draw()   
 
     def draw(self):
 
@@ -100,56 +121,17 @@ class huvudmeny:
         # Cursor
         pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius).draw()
 
-    def on_draw(self):
-        self.new_window.clear()
-        
-        #Bake border for background
-        border = pyglet.image.SolidColorImagePattern((2,189,20,255)).create_image(self.new_window.width, self.new_window.height)
-        border.blit(0,0)
-
-        #Background color
-        background = pyglet.image.SolidColorImagePattern((22,37,33,255)).create_image(self.new_window.width-20, self.new_window.height-20)
-        background.blit(10,10)
-
-        
-        self.draw()
-
-        #Draw button from png
-        
-        self.buttons.draw() 
-
-        titel = pyglet.text.Label('Project Mbappe',
-                          font_name='Bebas',
-                          font_size=75,
-                          x=self.new_window.width//2, y=self.new_window.height*(0.85),
-                          anchor_x='center', anchor_y='center')
-        titel.draw()
-        
-        self.fps_display.draw()
+   
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.cursor.x = x
         self.cursor.y = y
 
-    def update(self, dt):
-        #print(self.timer.time_remaining)
-        for button in self.circleButtons:
-            # button is made smaller when cursor is inside the button circle
-            
-            if (self.cursor.x - button.x)**2 + (self.cursor.y - button.y)**2 <= (button.radius - self.cursor.radius)**2:
-                self.x = 2
-                self.animate_button(button,dt)  # Animate the button circle
-                 # Create a new button
-                self.points = 20
-                self.switch_callback(self.x)
-                
-                
-            else:
-                button.outer_radius = button.radius + 30
-                button.outer_color = (2,189,20,255)
-                
+     
 
-            
+ 
+                
+                
                 
     def create_button(self):
         for i in range (2):

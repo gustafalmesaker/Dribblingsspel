@@ -48,11 +48,9 @@ class chooseGame:
         self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
-
         self.points = 0
         self.circleButtons = []
         self.create_button()
-
         self.new_window.push_handlers(self)
         pyglet.clock.schedule_interval(self.update, 1/10.0)
 
@@ -66,6 +64,9 @@ class chooseGame:
 
             self.button = pyglet.sprite.Sprite(imgbutton, x_pos, self.new_window.height*0.4, batch=self.buttons)
             self.sprites.append(self.button)
+        self.new_window.set_mouse_visible(False)
+        self.timer = Timer(10.0)
+        pyglet.clock.schedule_interval(self.timer.update, 1/10.0)
 
             if i == 2:
                 x_pos = self.new_window.width*(3/20)
@@ -87,6 +88,9 @@ class chooseGame:
         pyglet.clock.schedule_interval(self.timer.update, 1/10.0)
         self.time_rad = 10
 
+    def run(self):
+        pyglet.app.run()
+        
     def draw(self):
         for button in self.circleButtons:
             # Outer circle of button
