@@ -20,10 +20,10 @@ def read_csv(file_name):
             row[1]=row[1].replace(',','')
 
             exercise = row[0]
-            position_str = row[1]
+            position = row[1]
 
-            # Convert position string to list
-            position = (position_str)
+            # Convert position string to list of integers
+            position = (position)
 
             # Append exercise name and position to respective lists
             exercises.append(exercise)
