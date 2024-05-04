@@ -5,7 +5,6 @@ from ultralytics import YOLO
 import cv2
 #from soundtrack import play_sound
 
-
 ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvino model
 
 cap = cv2.VideoCapture(1)
