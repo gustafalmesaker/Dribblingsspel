@@ -4,6 +4,7 @@ from Read_file import read_csv
 from ultralytics import YOLO
 import cv2
 import math
+import time
 #from soundtrack import play_sound
 
 
@@ -12,10 +13,19 @@ ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvi
 cap = cv2.VideoCapture(0)
 ret = True
 #================ Sounds =================
+audioPlayer = pyglet.media.Player()
+audioPlayer.volume = 0.4
+audioPlayer.loop = True
 sound_music = pyglet.resource.media("soundtrack/meny_music.mp3")
+audioPlayer.queue(sound_music)
 sound_goal = pyglet.resource.media("soundtrack/goal.mp3")
+sound_goal2 = pyglet.resource.media("soundtrack/goal.mp3")
 sound_streak = pyglet.resource.media("soundtrack/streak.mp3")
-sound_music.play()
+sound_miss = pyglet.resource.media("soundtrack/miss.mp3")
+
+
+audioPlayer.play()
+#====================
 #=========================================
 
 class tracking:
@@ -104,10 +114,10 @@ class pointSystem:
 
     def update_streak(self):
         self.streak += 1
-        if self.streak in [10, 15, 25, 50, 100]:
-            sound_streak.play()
-        else: 
-            sound_goal.play()
+        if self.streak % 2 == 0: 
+            sound_goal.play()   
+        else:                       # sound does not play everytime if to fast (quickfix)
+            sound_goal2.play()
 
 
     def reset_points(self):
@@ -115,6 +125,7 @@ class pointSystem:
 
     def reset_streak(self):
         self.streak = 0
+        sound_miss.play()
 
 
 class Game():
@@ -124,6 +135,9 @@ class Game():
         #self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
+
+        self.new_window.push_handlers(self)
+        self.new_window.set_mouse_visible(False)
         
 
         # Read data from the CSV file
@@ -132,15 +146,12 @@ class Game():
         self.goalCircles = []
 
         self.counter = 0    # counts how many goals have been reached, and is used to determine the shrink rate (starts at 0)
-
         self.point_system = pointSystem() # Create a point system object
 
         self.tracking = tracking()
         self.trackcounter = 0
 
-        self.new_window.push_handlers(self)
-
-        self.new_window.set_mouse_visible(False)
+        
 
 
     def initial_position(self):
@@ -159,20 +170,19 @@ class Game():
 
         
         for position in self.positions_from_file[self.hash]:
-            #print("entered for loop")
-            #print(position)
+            position = int(position)
 
-            if position == "1":
+            if position == 1:
                 self.add_new_goal(pos1)
-            elif position == "2":
+            elif position == 2:
                 self.add_new_goal(pos2)
-            elif position == "3":
+            elif position == 3:
                 self.add_new_goal(pos3)
-            elif position == "4":
+            elif position == 4:
                 self.add_new_goal(pos4)
-            elif position == "5":
+            elif position == 5:
                 self.add_new_goal(pos5)
-            elif position == "6":
+            elif position == 6:
                 self.add_new_goal(pos6)
             else:
                 pass
@@ -184,6 +194,32 @@ class Game():
 
         fieldL = []
         fieldB = pyglet.graphics.Batch()
+
+        color_default = (2, 189, 20)
+        color_active = (184, 12, 9)
+        #find what find unique values in self.positions_from_file[self.hash]
+        unique_positions = set(self.positions_from_file[self.hash])
+        color_field = [color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default]
+
+        #change color lines based on if they are connected between the positions in unique_positions
+        if '1' in unique_positions and '2' in unique_positions:
+            color_field[0] = color_active
+        if '2' in unique_positions and '3' in unique_positions:
+            color_field[2] = color_active
+        if '3' in unique_positions and '6' in unique_positions:
+            color_field[3] = color_active
+        if '6' in unique_positions and '5' in unique_positions:
+            color_field[4] = color_active
+        if '5' in unique_positions and '4' in unique_positions:
+            color_field[5] = color_active
+        if '4' in unique_positions and '1' in unique_positions:
+            color_field[6] = color_active
+        if '2' in unique_positions and '5' in unique_positions:
+            color_field[7] = color_active
+        if '1' in unique_positions and '5' in unique_positions:
+            color_field[8] = color_active
+        if '5' in unique_positions and '3' in unique_positions:
+            color_field[9] = color_active
 
         pos1 = (150, self.new_window.height-150)
         pos2 = (self.new_window.width//2, self.new_window.height-150)
@@ -197,21 +233,32 @@ class Game():
         fieldL.append(pyglet.shapes.Rectangle(x=0, y=0, width=self.new_window.width, height=self.new_window.height, color=(2, 189, 20), batch = fieldB))
         #draw inner rectangle
         fieldL.append(pyglet.shapes.Rectangle(x=10, y=10, width=self.new_window.width-20, height=self.new_window.height-20, color=(0, 0, 0),batch=fieldB))
-        # Draw lines between the position pos1 and pos3
-        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20), batch=fieldB))
+    
+        # Draw lines between the position pos1 and pos2
+        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos2[0], y2=pos2[1], width=line_width, color=color_field[0], batch=fieldB))
+
+        # Draw lines between the position pos2 and pos3
+        fieldL.append(pyglet.shapes.Line(x=pos2[0], y=pos2[1], x2=pos3[0], y2=pos3[1], width=line_width, color=color_field[2], batch=fieldB))
+
         # Draw lines between the position pos3 and pos6
-        fieldL.append(pyglet.shapes.Line(x=pos3[0], y=pos3[1], x2=pos6[0], y2=pos6[1], width=line_width, color=(2, 189, 20), batch=fieldB))
-        # Draw lines between the position pos6 and pos4
-        fieldL.append(pyglet.shapes.Line(x=pos6[0], y=pos6[1], x2=pos4[0], y2=pos4[1], width=line_width, color=(2, 189, 20), batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos3[0], y=pos3[1], x2=pos6[0], y2=pos6[1], width=line_width, color=color_field[3], batch=fieldB))
+
+        #Draw lines between the position pos6 and pos5
+        fieldL.append(pyglet.shapes.Line(x=pos6[0], y=pos6[1], x2=pos5[0], y2=pos5[1], width=line_width, color=color_field[4], batch=fieldB))
+
+        # Draw lines between the position pos5 and pos4
+        fieldL.append(pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos4[0], y2=pos4[1], width=line_width, color=color_field[5], batch=fieldB))
+
         # Draw lines between the position pos4 and pos1
-        fieldL.append(pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=line_width, color=(2, 189, 20), batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos4[0], y=pos4[1], x2=pos1[0], y2=pos1[1], width=line_width, color=color_field[6], batch=fieldB))
+
+
         #draw lines between the position pos2 and pos5
-        fieldL.append(pyglet.shapes.Line(x=pos2[0]-8, y=pos2[1], x2=pos5[0]-8, y2=pos5[1], width=line_width, color=(2, 189, 20),batch=fieldB))
- 
+        fieldL.append(pyglet.shapes.Line(x=pos2[0], y=pos2[1], x2=pos5[0], y2=pos5[1], width=line_width, color=color_field[7], batch=fieldB))
         # Draw lines between the position pos1 and pos5
-        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=line_width, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=line_width, color=color_field[8], batch=fieldB))
         # Draw lines between the position pos5 and pos3
-        fieldL.append(pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=line_width, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=line_width, color=color_field[9], batch=fieldB))
 
         #draw dots at the positions
         fieldL.append(pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
@@ -293,6 +340,8 @@ class Game():
             else:
                 self.animate_goal(goal,dt)  # Animate the goal circle
         else:
+            if self.point_system.streak > 0:
+                sound_streak.play()
             self.initial_position()
 
     def add_new_goal(self, pos):
@@ -323,7 +372,7 @@ class Game():
         if goal.inner_radius <= 0:
 
             self.point_system.reset_streak() # Reset the streak (reduces points to base value)
-            self.goalCircles.remove(goal)    # Remove the goal circle
+            self.goalCircles = []    # Remove the goal circle
             self.counter //= 2              # Reset the counter to half of the previous value (rounded down)
             
 
