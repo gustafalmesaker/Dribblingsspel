@@ -57,7 +57,7 @@ def on_draw():
     if cursor.hovering == "survival" and window.game_started is False:
         loading_bar.show()
         if loading_bar.loading_percentage >= 1:
-            game_started = True
+            window.game_started = True
             run_game()
             
     elif cursor.hovering == "practice":
