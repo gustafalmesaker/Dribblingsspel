@@ -9,7 +9,7 @@ import math
 
 ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvino model
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 ret = True
 #================ Sounds =================
 sound_music = pyglet.resource.media("soundtrack/meny_music.mp3")

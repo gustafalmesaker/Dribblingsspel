@@ -1,6 +1,7 @@
 import pyglet
 from loading_bar import LoadingBar
 from survival_mode import Game
+from run_game import run_game
 # Load images
 practice = pyglet.image.load('assets/practice.png')  # 150 x 150 px
 survival = pyglet.image.load('assets/survival.png')  # 150 x 150 px
@@ -21,6 +22,8 @@ image_y = (window_height - practice.height) // 2
 
 # Create window
 window = pyglet.window.Window(width=window_width, height=window_height)
+window.game_started = False
+
 
 class Cursor:
     def __init__(self, x, y, radius):
@@ -50,11 +53,12 @@ loading_bar = LoadingBar(window_width=window_height, window_height=window_height
 @window.event
 def on_draw():
     window.clear()
-    # Draw green rectangle behind images if hovering
-    if cursor.hovering == "survival":
+    
+    if cursor.hovering == "survival" and window.game_started is False:
         loading_bar.show()
         if loading_bar.loading_percentage >= 1:
-            game = Game()
+            game_started = True
+            run_game()
             
     elif cursor.hovering == "practice":
         loading_bar.show()
