@@ -17,7 +17,7 @@ ov_model = YOLO('models\model_v1.1_openvino_model/',task="detect") #load openvin
 video_path = "videos\Test_ball_detection_2.mp4"
 #video_path = "videos\Test_ball_detection.gif"
 
-cap = cv2.VideoCapture(video_path)
+cap = cv2.VideoCapture(1)
 
 #cap = cv2.VideoCapture(0) #test with live camera
 #cap = cv2.VideoCapture(1) #test with live webcamera
@@ -31,22 +31,7 @@ while ret:
         results = ov_model.track(frame, persist=True)
         #results = model.track(frame, persist=True)
 
-        # filter results
-        # Check if results[0].boxes.xyxy is not empty
-        if results[0].boxes.xyxy is not None:
-            # Filter based on class ID (assuming it's accessed using 'cls')
-            filtered_results = [obj for obj in results[0].boxes if obj.cls == 0]
-           
-
-            if filtered_results:  # Checking if the filtered list is not empty
-                print("här kommer sorterad")
-                print(filtered_results)
-                frame_ = filtered_results.plot()
-            else:
-                frame_ = results[0].plot()
-        else:
-            # Handle case where results[0].boxes.xyxy is empty
-            frame_ = results[0].plot()
+        frame_ = results[0].plot()
 
 
         

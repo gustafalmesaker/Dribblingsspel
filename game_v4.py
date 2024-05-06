@@ -10,7 +10,7 @@ import time
 
 ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvino model
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 ret = True
 #================ Sounds =================
 audioPlayer = pyglet.media.Player()
@@ -25,8 +25,9 @@ sound_miss = pyglet.resource.media("soundtrack/miss.mp3")
 
 
 audioPlayer.play()
-#====================
-#=========================================
+#================animations===================
+animation = pyglet.image.load_animation('images/explosion.gif')
+sprite = pyglet.sprite.Sprite(animation)
 
 class tracking:
     def __init__(self):
@@ -145,6 +146,8 @@ class Game():
         self.hash = 0
         self.goalCircles = []
 
+        self.is_goal = False
+
         self.counter = 0    # counts how many goals have been reached, and is used to determine the shrink rate (starts at 0)
         self.point_system = pointSystem() # Create a point system object
 
@@ -195,8 +198,8 @@ class Game():
         fieldL = []
         fieldB = pyglet.graphics.Batch()
 
-        color_default = (2, 189, 20)
-        color_active = (184, 12, 9)
+        color_default = (125, 125, 130)
+        color_active = (2, 189, 20)
         #find what find unique values in self.positions_from_file[self.hash]
         unique_positions = set(self.positions_from_file[self.hash])
         color_field = [color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default, color_default]
@@ -220,6 +223,21 @@ class Game():
             color_field[8] = color_active
         if '5' in unique_positions and '3' in unique_positions:
             color_field[9] = color_active
+
+        #color of the dots
+        dot_color = [color_default, color_default, color_default, color_default, color_default, color_default]
+        if '1' in unique_positions:
+            dot_color[0] = color_active
+        if '2' in unique_positions:
+            dot_color[1] = color_active
+        if '3' in unique_positions:
+            dot_color[2] = color_active
+        if '4' in unique_positions:
+            dot_color[3] = color_active
+        if '5' in unique_positions:
+            dot_color[4] = color_active
+        if '6' in unique_positions:
+            dot_color[5] = color_active
 
         pos1 = (150, self.new_window.height-150)
         pos2 = (self.new_window.width//2, self.new_window.height-150)
@@ -254,19 +272,19 @@ class Game():
 
 
         #draw lines between the position pos2 and pos5
-        fieldL.append(pyglet.shapes.Line(x=pos2[0], y=pos2[1], x2=pos5[0], y2=pos5[1], width=line_width, color=color_field[7], batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos2[0]-(line_width/2), y=pos2[1], x2=pos5[0]-(line_width/2), y2=pos5[1], width=line_width, color=color_field[7], batch=fieldB))
         # Draw lines between the position pos1 and pos5
-        fieldL.append(pyglet.shapes.Line(x=pos1[0], y=pos1[1], x2=pos5[0], y2=pos5[1], width=line_width, color=color_field[8], batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos1[0]-(line_width/2), y=pos1[1], x2=pos5[0]-(line_width/2), y2=pos5[1], width=line_width, color=color_field[8], batch=fieldB))
         # Draw lines between the position pos5 and pos3
-        fieldL.append(pyglet.shapes.Line(x=pos5[0], y=pos5[1], x2=pos3[0], y2=pos3[1], width=line_width, color=color_field[9], batch=fieldB))
+        fieldL.append(pyglet.shapes.Line(x=pos5[0]+(line_width/2), y=pos5[1], x2=pos3[0]+(line_width/2), y2=pos3[1], width=line_width, color=color_field[9], batch=fieldB))
 
         #draw dots at the positions
-        fieldL.append(pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
-        fieldL.append(pyglet.shapes.Circle(x=pos2[0], y=pos2[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
-        fieldL.append(pyglet.shapes.Circle(x=pos3[0], y=pos3[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
-        fieldL.append(pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
-        fieldL.append(pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
-        fieldL.append(pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=(2, 189, 20),batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos1[0], y=pos1[1], radius=dot_radius, color=dot_color[0],batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos2[0], y=pos2[1], radius=dot_radius, color=dot_color[1],batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos3[0], y=pos3[1], radius=dot_radius, color=dot_color[2],batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=dot_color[3],batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=dot_color[4],batch=fieldB))
+        fieldL.append(pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=dot_color[5],batch=fieldB))
         fieldB.draw()
 
           
@@ -298,6 +316,7 @@ class Game():
         #Streak display next to points
         drawL.append(pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
         drawB.draw()
+        self.animation_effect()
 
     def on_draw(self):
         self.new_window.clear()
@@ -310,8 +329,8 @@ class Game():
 
     def ball_position(self,x,y):
         #print(x, y)
-        self.cursor.x = (self.new_window.width * (1-x)*1.2)
-        self.cursor.y = self.new_window.height * y * 1.2
+        self.cursor.x = self.new_window.width * (1-x)
+        self.cursor.y = self.new_window.height * y 
 
     def update(self, dt):
 
@@ -321,14 +340,17 @@ class Game():
 
         self.trackcounter += 1
 
-        
-
         if self.goalCircles:
             goal = self.goalCircles[0]
 
             # Goal is made smaller when cursor is inside the goal circle
 
             if (self.cursor.x - goal.x)**2 + (self.cursor.y - goal.y)**2 <= (goal.radius - self.cursor.radius)**2:
+                
+                self.is_goal = True
+                
+                sprite.x = goal.x-225
+                sprite.y = goal.y-250
 
                 self.goalCircles.remove(goal) # Remove the goal circlel
                 self.point_system.update_streak() # Update the streak (needs to be before updating points)
@@ -375,7 +397,13 @@ class Game():
             self.goalCircles = []    # Remove the goal circle
             self.counter //= 2              # Reset the counter to half of the previous value (rounded down)
             
-
+    def animation_effect(self):
+        if self.is_goal == True:
+            sprite.draw()
+            #if sprite has played the gif once, then set is_goal to False
+            if sprite._frame_index == len(sprite._animation.frames)-1:
+                self.is_goal = False
+                sprite._frame_index = 0
 
 # if __name__ == "__main__":
 #     game = Game()
