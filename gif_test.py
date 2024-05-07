@@ -4,16 +4,13 @@ import cv2, time
 
 from ultralytics import YOLO
 
-import openvino.properties as props
-import openvino.properties.hint as hints
 
-
-model = YOLO("models\model_v1.1.pt",task="detect") #load created model
+#model = YOLO("models\model_v1.1.pt",task="detect") #load created model
 ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvino model
 
 
 class VideoStreamWidget(object):
-    def __init__(self, src=1):
+    def __init__(self, src=0):
         self.capture = cv2.VideoCapture(src)
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.update, args=())
@@ -41,7 +38,7 @@ class VideoStreamWidget(object):
             cv2.destroyAllWindows()
             exit(1)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     video_stream_widget = VideoStreamWidget()
     while True:
         try:
