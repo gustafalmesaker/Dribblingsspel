@@ -1,0 +1,7 @@
+path: 'C:\Users\guffi\Documents\GitHub\Dribblingsspel\models\_yolov8_ball_detector\code\data' #must be absolute path
+train: 'images/train'
+val: 'images/train'
+
+names:
+  0: sports ball
+  
