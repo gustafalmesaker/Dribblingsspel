@@ -26,7 +26,7 @@ ret = True
 while ret:
     if ret:
         ret, frame = cap.read()
-        frame = cv2.resize(frame , (640 , 640), interpolation=cv2.INTER_LINEAR)
+        #frame = cv2.resize(frame , (640 , 640), interpolation=cv2.INTER_LINEAR)
         #results = compiled_model.track(frame, persist=True)
         results = ov_model.track(frame, persist=True)
         #results = model.track(frame, persist=True)
