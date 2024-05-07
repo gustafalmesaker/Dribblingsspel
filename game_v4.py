@@ -21,8 +21,7 @@ audioPlayer.queue(sound_music)
 sound_goal = pyglet.resource.media("soundtrack/goal.mp3")
 sound_goal2 = pyglet.resource.media("soundtrack/goal.mp3")
 sound_streak = pyglet.resource.media("soundtrack/streak.mp3")
-sound_miss = pyglet.resource.media("soundtrack/miss.mp3")
-
+sound_miss = pyglet.resource.media("soundtrack/miss.mp3") 
 
 audioPlayer.play()
 #================animations===================
