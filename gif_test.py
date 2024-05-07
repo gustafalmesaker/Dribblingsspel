@@ -1,7 +1,6 @@
-
 from threading import Thread
-import cv2, time
-
+import cv2
+import time
 from ultralytics import YOLO
 
 
@@ -12,6 +11,7 @@ ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvi
 class VideoStreamWidget(object):
     def __init__(self, src=0):
         self.capture = cv2.VideoCapture(src)
+        self.capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.update, args=())
         self.thread.daemon = True
@@ -23,20 +23,19 @@ class VideoStreamWidget(object):
             if self.capture.isOpened():
                 (self.status, self.frame) = self.capture.read()
             time.sleep(.01)
-            
-
 
     def show_frame(self):
         # Display frames in main program
-        cv2.imshow('frame', self.frame)
-        results = ov_model.track(self.frame, persist=True)
-        frame_ = results[0].plot()
-        cv2.imshow('frame', frame_)
-        key = cv2.waitKey(1)
-        if key == ord('q'):
-            self.capture.release()
-            cv2.destroyAllWindows()
-            exit(1)
+        if self.frame is not None:
+            cv2.imshow('frame', self.frame)
+            results = ov_model.track(self.frame, persist=True)
+            frame_ = results[0].plot()
+            cv2.imshow('frame', frame_)
+            key = cv2.waitKey(1)
+            if key == ord('q'):
+                self.capture.release()
+                cv2.destroyAllWindows()
+                exit(1)
 
 if __name__ == "__main__":
     video_stream_widget = VideoStreamWidget()
@@ -45,6 +44,7 @@ if __name__ == "__main__":
             video_stream_widget.show_frame()
         except AttributeError:
             pass
+
 
 # def main():
 #     # Open the default camera (usually the webcam)
