@@ -7,7 +7,7 @@ from ultralytics import YOLO
 ov_model = YOLO('models\\final_model_20_epochs_openvino_model', task="detect")
 
 class VideoStreamWidget(object):
-    def __init__(self, src=1):
+    def __init__(self, src=0):
         self.capture = cv2.VideoCapture(src)
         self.capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
         # Start the thread to read frames from the video stream

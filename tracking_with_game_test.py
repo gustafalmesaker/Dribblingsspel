@@ -1,16 +1,43 @@
+# import the necessary packages
+from collections import deque
+from imutils.video import VideoStream
+import numpy as np
+import argparse
+import cv2
+import imutils
+import time
 import pyglet
 import random
-from Read_file import read_csv
-from ultralytics import YOLO
-from threading import Thread
-import cv2
 import math
-import time
-#from soundtrack import play_sound
+from Read_file import read_csv
 
+#=======================Tracking==============================
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-v", "--video",
+    help="path to the (optional) video file")
+ap.add_argument("-b", "--buffer", type=int, default=64,
+    help="max buffer size")
+args = vars(ap.parse_args()) 
 
-ov_model = YOLO('models\\final_model_20_epochs_openvino_model',task="detect") #load openvino model
-#ov_model = YOLO('models\\final_model.pt') #load openvino model
+# define the lower and upper boundaries of the "green"
+# ball in the HSV color space, then initialize the
+# list of tracked points
+greenLower = (29, 86, 6)
+greenUpper = (64, 255, 255)
+pts = deque(maxlen=args["buffer"])
+
+# if a video path was not supplied, grab the reference
+# to the webcam
+if not args.get("video", False):
+    vs = VideoStream(src=0).start()
+# otherwise, grab a reference to the video file
+else:
+    print("Video not found")
+
+# allow the camera or video file to warm up
+time.sleep(2.0)
+
 #================ Sounds =================
 audioPlayer = pyglet.media.Player()
 audioPlayer.volume = 0.4
@@ -27,51 +54,7 @@ audioPlayer.play()
 animation = pyglet.image.load_animation('images/explosion.gif')
 sprite = pyglet.sprite.Sprite(animation)
 
-class tracking:
-    def __init__(self, src=0):
-        self.capture = cv2.VideoCapture(src)
-        self.capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
-        # Start the thread to read frames from the video stream
-        self.thread = Thread(target=self.update_pos, args=())
-        self.thread.daemon = True
-        self.thread.start()
-        self.circle_pos_x = 600
-        self.circle_pos_y = 600
 
-    #find where sports balls are located (id 32)
-    def center_points(self,results):
-        box_list = []
-        sports_ball_id = 32
-        person_id = 0
-
-        if results[0].boxes.xyxy is not None:
-            for obj in results[0].boxes:
-                if obj.cls == sports_ball_id:
-                    x_n, y_n, w, h = obj.xywhn[0].tolist()
-                    box_list.append([x_n, y_n])
-
-                # elif obj.cls == person_id:
-                #     x_n, y_n, w, h = obj.xywhn[0].tolist()
-                #     box_list.append([x_n, y_n])
-        return box_list
-        
-
-    def update_pos(self):
-
-        if self.capture.isOpened():
-            (self.status, self.frame) = self.capture.read()
-        time.sleep(.01)
-
-        #self.frame = cv2.resize(self.frame , (1420 , 800), interpolation=cv2.INTER_LINEAR)
-        results = ov_model.track(self.frame, persist=True)
-
-        if results[0] is not None:
-            pos = self.center_points(results)
-            if pos != []:
-                self.circle_pos_x,self.circle_pos_y = pos[0]
-            else:
-                self.circle_pos_x = self.circle_pos_x
-                self.circle_pos_y = self.circle_pos_y      
 
 
 class goalCircle:
@@ -139,7 +122,7 @@ class pointSystem:
 class Game():
     def __init__(self):
         config = pyglet.gl.Config(double_buffer=True, depth_size=24)
-        self.new_window = pyglet.window.Window(width=1420, height=800, caption="Game", vsync=False, config=config )
+        self.new_window = pyglet.window.Window(width=1280, height=720, caption="Game", vsync=False, config=config )
         #self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
@@ -158,10 +141,10 @@ class Game():
         self.counter = 0    # counts how many goals have been reached, and is used to determine the shrink rate (starts at 0)
         self.point_system = pointSystem() # Create a point system object
 
-        self.tracking = tracking()
         self.trackcounter = 0
 
-        
+        self.ball_center = (self.new_window.width, self.new_window.height)
+
 
 
     def initial_position(self):
@@ -197,7 +180,62 @@ class Game():
             else:
                 pass
 
+
+    def tracking(self):
+        # Read the current frame
+        frame = vs.read()
+
+        # Preprocess the frame
+        frame = frame[1] if args.get("video", False) else frame
+        frame = imutils.resize(frame, width=600)
+        blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+        hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
+        # Create a mask to isolate the ball color
+        mask = cv2.inRange(hsv, greenLower, greenUpper)
+        mask = cv2.erode(mask, None, iterations=2)
+        mask = cv2.dilate(mask, None, iterations=2)
+
+        # Find contours in the mask
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+
+        # Initialize variables to store the center of the ball
+        new_center = self.ball_center
+
+        # Only proceed if at least one contour was found
+        if len(cnts) > 0:
+            # Find the largest contour in the mask
+            c = max(cnts, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+
+            # Compute the area of the contour
+            area = cv2.contourArea(c)
+
+            # Set a threshold for the minimum contour area to consider
+            min_area_threshold = 50
+
+            # If the contour area is above the threshold, consider it as the ball
+            if area > min_area_threshold:
+                # Compute the centroid of the contour
+                M = cv2.moments(c)
+                new_center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             
+
+        # Smooth movement: Linear interpolation between previous and current positions
+        if new_center is not None:
+            # Define the smoothing factor (how much influence the new position has)
+            smoothing_factor = 0.1
+            # Compute the interpolated position
+            interpolated_center = (int((1 - smoothing_factor) * self.ball_center[0] + smoothing_factor * new_center[0]),
+                                int((1 - smoothing_factor) * self.ball_center[1] + smoothing_factor * new_center[1]))
+            # Update the ball center
+            self.ball_center = interpolated_center
+            # Return the center of the ball
+            self.ball_position(interpolated_center[0], interpolated_center[1])
+
+
+
     def field(self):
         line_width = 15
         dot_radius = 25
@@ -333,26 +371,17 @@ class Game():
         self.cursor.x = x
         self.cursor.y = y
 
-    def ball_position(self, x, y, scale_factor=1.5):
-        # Assuming self.cursor represents the position of a cursor in the window
-        # Calculate scaled width and height
-        scaled_width = self.new_window.width * scale_factor
-        scaled_height = self.new_window.height * scale_factor
-        
-        # Calculate the centered coordinates
-        centered_x = (self.new_window.width - scaled_width) / 2 + (1-x) * scaled_width
-        centered_y = (self.new_window.height - scaled_height) / 2 + y * scaled_height
-        
-        # Map the centered coordinates to the cursor's position
-        self.cursor.x = centered_x
-        self.cursor.y = centered_y
+    def ball_position(self, x, y):
+        #normalize the position of the ball 600x600 to 1280x720
+        x = x*2.1333333333333333
+        y = y*1.2
+        self.cursor.x = self.new_window.width - x
+        self.cursor.y = y
 
 
     def update(self, dt):
 
-        if self.trackcounter % 3 == 0:
-            self.tracking.update_pos()
-            self.ball_position(self.tracking.circle_pos_x,self.tracking.circle_pos_y)
+        self.tracking()
 
         self.trackcounter += 1
 
@@ -421,9 +450,7 @@ class Game():
                 self.is_goal = False
                 sprite._frame_index = 0
 
-# if __name__ == "__main__":
-#     game = Game()
-#     pyglet.clock.schedule_interval(game.update, 1.0/ 120.0)
-
-#     pyglet.app.run()
-
+if __name__ == "__main__":
+    game = Game()
+    pyglet.clock.schedule_interval(game.update, 1.0/ 60.0)
+    pyglet.app.run()
