@@ -13,17 +13,16 @@ ov_model = YOLO('models\model_v1.1_openvino_model/') #load openvino model
 def draw_center_point(results, frame_):
     print(results[0].boxes)
 
-    for box in results[0].boxes.xyxy:
+    for box in results[0].boxes.xywh:
         # Extracting bounding box coordinates
-        x_min, y_min, x_max, y_max = box
+        x, y, w, h = box
         
         # Calculating center position
-        center_x = (x_min + x_max) / 2
-        center_y = (y_min + y_max) / 2
+
         
         #print("Position:", center_x, center_y)
 
-        cv2.circle(frame_, (int(center_x), int(center_y)), radius=5, color=(0, 255, 0), thickness=-1)  # Adjust radius and color as needed
+        cv2.circle(frame_, (int(x), int(y)), radius=5, color=(0, 255, 0), thickness=-1)  # Adjust radius and color as needed
     #return frame_
 
 #config = {hints.performance_mode: hints.PerformanceMode.THROUGHPUT}

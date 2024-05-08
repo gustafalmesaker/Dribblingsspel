@@ -2,16 +2,15 @@ import pyglet
 import random
 from Read_file import read_csv
 from ultralytics import YOLO
+from threading import Thread
 import cv2
 import math
 import time
 #from soundtrack import play_sound
 
 
-ov_model = YOLO('models\\final_model_openvino_model',task="detect") #load openvino model
-
-cap = cv2.VideoCapture(1)
-ret = True
+ov_model = YOLO('models\\final_model_20_epochs_openvino_model',task="detect") #load openvino model
+#ov_model = YOLO('models\\final_model.pt') #load openvino model
 #================ Sounds =================
 audioPlayer = pyglet.media.Player()
 audioPlayer.volume = 0.4
@@ -29,7 +28,13 @@ animation = pyglet.image.load_animation('images/explosion.gif')
 sprite = pyglet.sprite.Sprite(animation)
 
 class tracking:
-    def __init__(self):
+    def __init__(self, src=1):
+        self.capture = cv2.VideoCapture(src)
+        self.capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        # Start the thread to read frames from the video stream
+        self.thread = Thread(target=self.update_pos, args=())
+        self.thread.daemon = True
+        self.thread.start()
         self.circle_pos_x = 600
         self.circle_pos_y = 600
 
@@ -52,18 +57,21 @@ class tracking:
         
 
     def update_pos(self):
-        ret, frame = cap.read()
 
-        frame = cv2.resize(frame , (1420 , 800), interpolation=cv2.INTER_LINEAR)
-        results = ov_model.track(frame, persist=True)
+        if self.capture.isOpened():
+            (self.status, self.frame) = self.capture.read()
+        time.sleep(.01)
+
+        #self.frame = cv2.resize(self.frame , (1420 , 800), interpolation=cv2.INTER_LINEAR)
+        results = ov_model.track(self.frame, persist=True)
 
         if results[0] is not None:
             pos = self.center_points(results)
             if pos != []:
                 self.circle_pos_x,self.circle_pos_y = pos[0]
-        else:
-            self.circle_pos_x = self.circle_pos_x
-            self.circle_pos_y = self.circle_pos_y      
+            else:
+                self.circle_pos_x = self.circle_pos_x
+                self.circle_pos_y = self.circle_pos_y      
 
 
 class goalCircle:
@@ -284,9 +292,7 @@ class Game():
         fieldL.append(pyglet.shapes.Circle(x=pos4[0], y=pos4[1], radius=dot_radius, color=dot_color[3],batch=fieldB))
         fieldL.append(pyglet.shapes.Circle(x=pos5[0], y=pos5[1], radius=dot_radius, color=dot_color[4],batch=fieldB))
         fieldL.append(pyglet.shapes.Circle(x=pos6[0], y=pos6[1], radius=dot_radius, color=dot_color[5],batch=fieldB))
-        fieldB.draw()
-
-          
+        fieldB.draw()   
 
     def draw(self):
         # Draw the field
@@ -315,7 +321,8 @@ class Game():
         #Streak display next to points
         drawL.append(pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
         drawB.draw()
-        self.animation_effect()
+        #self.animation_effect()
+
 
     def on_draw(self):
         self.new_window.clear()
@@ -326,10 +333,20 @@ class Game():
         self.cursor.x = x
         self.cursor.y = y
 
-    def ball_position(self,x,y):
-        #print(x, y)
-        self.cursor.x = self.new_window.width * (1-x)
-        self.cursor.y = self.new_window.height * y 
+    def ball_position(self, x, y, scale_factor=1.5):
+        # Assuming self.cursor represents the position of a cursor in the window
+        # Calculate scaled width and height
+        scaled_width = self.new_window.width * scale_factor
+        scaled_height = self.new_window.height * scale_factor
+        
+        # Calculate the centered coordinates
+        centered_x = (self.new_window.width - scaled_width) / 2 + (1-x) * scaled_width
+        centered_y = (self.new_window.height - scaled_height) / 2 + y * scaled_height
+        
+        # Map the centered coordinates to the cursor's position
+        self.cursor.x = centered_x
+        self.cursor.y = centered_y
+
 
     def update(self, dt):
 
