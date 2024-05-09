@@ -20,12 +20,19 @@ args = vars(ap.parse_args())
 # list of tracked points
 greenLower = (29, 86, 6)
 greenUpper = (64, 255, 255)
+
+blueLower = (87, 54, 78)
+blueUpper = (104, 252, 255)
+
+colorLower = blueLower
+colorUpper = blueUpper
+
 pts = deque(maxlen=args["buffer"])
 
 # if a video path was not supplied, grab the reference
 # to the webcam
 if not args.get("video", False):
-	vs = VideoStream(src=0).start()
+	vs = VideoStream(src=1).start()
 	#vs.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
 	#vs.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 
@@ -50,14 +57,28 @@ while True:
 
 	# resize the frame, blur it, and convert it to the HSV
 	# color space
-	frame = imutils.resize(frame, width=1280)
+	frame = imutils.resize(frame, width=640)
+
+	res_w = 640
+	res_h = 640
+
+	x0 = 200 # 400px left of center
+	y0 = 250 # 400px above center
+
+	x1 = 510 # 400px right of center
+	y1 = 420 # 400px below center
+	frame = frame[y0:y1, x0:x1] # slicing
+	print(frame.shape)
+
+	print(frame.size)
+
 	blurred = cv2.GaussianBlur(frame, (11, 11), 0)
 	hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
 	# construct a mask for the color "green", then perform
 	# a series of dilations and erosions to remove any small
 	# blobs left in the mask
-	mask = cv2.inRange(hsv, greenLower, greenUpper)
+	mask = cv2.inRange(hsv, colorLower, colorUpper)
 	mask = cv2.erode(mask, None, iterations=2)
 	mask = cv2.dilate(mask, None, iterations=2)
 
@@ -85,6 +106,7 @@ while True:
 				(0, 255, 255), 2)
 			
 			cv2.circle(frame, center, 5, (0, 0, 255), -1)
+			#print(center)
 	
 	# # update the points queue
 	# pts.appendleft(center)

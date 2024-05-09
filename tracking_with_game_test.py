@@ -25,12 +25,17 @@ args = vars(ap.parse_args())
 # list of tracked points
 greenLower = (29, 86, 6)
 greenUpper = (64, 255, 255)
+blueLower = (87, 54, 78)
+blueUpper = (104, 252, 255)
+
+colorLower = blueLower
+colorUpper = blueUpper
 pts = deque(maxlen=args["buffer"])
 
 # if a video path was not supplied, grab the reference
 # to the webcam
 if not args.get("video", False):
-    vs = VideoStream(src=0).start()
+    vs = VideoStream(src=1).start()
 # otherwise, grab a reference to the video file
 else:
     print("Video not found")
@@ -122,7 +127,7 @@ class pointSystem:
 class Game():
     def __init__(self):
         config = pyglet.gl.Config(double_buffer=True, depth_size=24)
-        self.new_window = pyglet.window.Window(width=1280, height=720, caption="Game", vsync=False, config=config )
+        self.new_window = pyglet.window.Window(width=1920, height=1080,style =pyglet.window.Window.WINDOW_STYLE_BORDERLESS, caption="Game", vsync=False, config=config )
         #self.new_window.set_vsync(False)
         self.fps_display = pyglet.window.FPSDisplay(self.new_window)
         self.cursor = cursor(x=self.new_window.width//2, y=self.new_window.height//2, radius=20)
@@ -187,12 +192,19 @@ class Game():
 
         # Preprocess the frame
         frame = frame[1] if args.get("video", False) else frame
-        frame = imutils.resize(frame, width=600)
+        frame = imutils.resize(frame, width=640)
+        x0 = 200 # 400px left of center
+        y0 = 250 # 400px above center
+        x1 = 510 # 400px right of center
+        y1 = 420 # 400px below center
+        frame = frame[y0:y1, x0:x1] # slicing	    
+
+	        
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
         # Create a mask to isolate the ball color
-        mask = cv2.inRange(hsv, greenLower, greenUpper)
+        mask = cv2.inRange(hsv, colorLower, colorUpper)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
 
@@ -225,7 +237,7 @@ class Game():
         # Smooth movement: Linear interpolation between previous and current positions
         if new_center is not None:
             # Define the smoothing factor (how much influence the new position has)
-            smoothing_factor = 0.1
+            smoothing_factor = 0.5
             # Compute the interpolated position
             interpolated_center = (int((1 - smoothing_factor) * self.ball_center[0] + smoothing_factor * new_center[0]),
                                 int((1 - smoothing_factor) * self.ball_center[1] + smoothing_factor * new_center[1]))
@@ -351,7 +363,7 @@ class Game():
             
 
         # Cursor
-        drawL.append(pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius, batch=drawB))
+        #drawL.append(pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius, batch=drawB))
 
         #Points display in top midde of screen
         drawL.append(pyglet.text.Label("Points: " + str(self.point_system.points), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 -100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
@@ -359,7 +371,7 @@ class Game():
         #Streak display next to points
         drawL.append(pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
         drawB.draw()
-        #self.animation_effect()
+        self.animation_effect()
 
 
     def on_draw(self):
@@ -372,10 +384,37 @@ class Game():
         self.cursor.y = y
 
     def ball_position(self, x, y):
-        #normalize the position of the ball 600x600 to 1280x720
-        x = x*2.1333333333333333
-        y = y*1.2
-        self.cursor.x = self.new_window.width - x
+        #normalize the position of the ball 170x310 to 1920x1080
+        x = x*5.8
+        y = y*7.2
+       
+
+        #Scale the position of the ball to the window size ,left_down: (500, 260), left_up : (500,420), right_down: (240, 260), right_up: (240, 420)
+
+        # if x > 500 and y > 260 and y < 420:
+        #     self.cursor.x = 150
+        #     self.cursor.y = 150
+        # elif x < 500 and x > 240 and y > 260 and y < 420:
+        #     self.cursor.x = self.new_window.width//2
+        #     self.cursor.y = 150
+        # elif x < 240 and y > 260 and y < 420:
+        #     self.cursor.x = self.new_window.width-150
+        #     self.cursor.y = 150
+        # elif x > 500 and y > 420:
+        #     self.cursor.x = 150
+        #     self.cursor.y = self.new_window.height-150
+        # elif x < 500 and x > 240 and y > 420:
+        #     self.cursor.x = self.new_window.width//2
+        #     self.cursor.y = self.new_window.height-150  
+        # elif x < 240 and y > 420:
+        #     self.cursor.x = self.new_window.width-150
+        #     self.cursor.y = self.new_window.height-150
+        # else:
+        #     self.cursor.x = x
+        #     self.cursor.y = y
+
+       
+        self.cursor.x = (self.new_window.width - (x))
         self.cursor.y = y
 
 
@@ -412,7 +451,7 @@ class Game():
             self.initial_position()
 
     def add_new_goal(self, pos):
-            radius = 100
+            radius = 150
             goal = goalCircle(pos, radius)
             self.goalCircles.append(goal)
         
