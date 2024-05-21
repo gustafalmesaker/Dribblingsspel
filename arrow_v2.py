@@ -61,9 +61,10 @@ inside = True
 
 # --- ARROWS --- #
 # Start
-start_x, start_y = 100, 560
+start_x, start_y = 140, 360
 # End
-end_x, end_y = 500, 560 
+#end_x, end_y = 500, 560 
+end_x, end_y = 540, 360
 
 # Arrow
 x3, y3 = end_x-100, end_y-75
@@ -84,17 +85,21 @@ x4, y4 = end_x-100, end_y+75
 # -------------------------------- ROTATION -------------------------------- #
 # Anchor point #
 ox, oy = end_x, end_y
+rot_angle = math.radians(0)
+
+# def set_rot_angle(ang):
+#     global rot_angle
+#     rot_angle = math.radians(ang)
 
 #rot_angle = math.radians(0) # RIGHT
 #rot_angle = math.radians(180) # LEFT
-rot_angle = math.radians(90) # UP
+#rot_angle = math.radians(90) # UP
 #rot_angle = math.radians(-90) # DOWN
 
 #rot_angle = math.radians(45) # UP RIGHT
 #rot_angle = math.radians(135) # UP LEFT
 #rot_angle = math.radians(-45) # DOWN RIGHT
 #rot_angle = math.radians(-135) # DOWN LEFT
-
 
 # Rotation #
 start_x_r, start_y_r = ox + math.cos(rot_angle) * (start_x - ox) - math.sin(rot_angle) * (start_y - oy), oy + math.sin(rot_angle) * (start_x - ox) + math.cos(rot_angle) * (start_y - oy)
@@ -412,6 +417,9 @@ def on_mouse_motion(x, y, dx, dy):
 def on_draw():
     pyglet.gl.glClearColor(1, 1, 1, 1)
     window.clear()
+
+    #set_rot_angle(180)
+
     line_batch.draw()
     point_batch.draw()
     text_batch.draw()
