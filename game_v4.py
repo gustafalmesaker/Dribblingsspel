@@ -321,7 +321,7 @@ class Game():
         #Streak display next to points
         drawL.append(pyglet.text.Label("Streak: " + str(self.point_system.streak), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 + 100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
         drawB.draw()
-        #self.animation_effect()
+        self.animation_effect()
 
 
     def on_draw(self):
