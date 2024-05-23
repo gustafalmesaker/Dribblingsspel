@@ -138,7 +138,7 @@ if rot_angle == math.radians(0):
 
 # -------------------------------- RESET -------------------------------- #
 @window.event
-def draw_arrow():
+def draw_arrow(arrow_x, arrow_y, dir):
     global start_x, start_y, end_x, end_y, x3, y3, x4, y4
     global start_x_r, start_y_r, end_x_r, end_y_r, x3_r, y3_r, x4_r, y4_r
     global rot_angle, ox, oy, angle1, angle2
@@ -157,12 +157,20 @@ def draw_arrow():
     done = False
     prog = 0
     loading_bar_width_text.text = 'PROGRESS: {:.1f}'.format(prog)
+    # -------------------- #
 
-    # Start & End point
-    start_x = random.randint(500, width-500)
-    start_y = height//2
-    end_x = start_x + 400
-    end_y = start_y
+    # --- Start & End point --- #
+
+    end_x = arrow_x
+    end_y = arrow_y
+
+    start_y = end_y
+    start_x = end_x - 400
+
+    # start_x = random.randint(500, width-500)
+    # start_y = height//2
+    # end_x = start_x + 400
+    # end_y = start_y
 
     # Arrow
     x3, y3 = end_x-100, end_y-75
@@ -170,13 +178,34 @@ def draw_arrow():
 
     ox = end_x
     oy = end_y
-    # -------------------- #
+    # ------------------------- #
 
-    # --- RANODMIX rot_angle --- #
-    rot_angle = random.choice([math.radians(0), math.radians(90), math.radians(180), math.radians(-90), math.radians(45), math.radians(135), math.radians(-45), math.radians(-135)])
-    print("rot_angle: ", math.degrees(rot_angle))
+
+    # --- rot_angle --- #
+    # rot_angle = random.choice([math.radians(0), math.radians(90), math.radians(180), math.radians(-90), math.radians(45), math.radians(135), math.radians(-45), math.radians(-135)])
+    # print("rot_angle: ", math.degrees(rot_angle))
+    direction = dir
+
+    if direction == "R": 
+        rot_angle = math.radians(0)
+    elif direction == "L":
+        rot_angle = math.radians(180)
+    elif direction == "U":
+        rot_angle = math.radians(90)
+    elif direction == "D":
+        rot_angle = math.radians(-90)
+    
+    elif direction == "UR":
+        rot_angle = math.radians(45)
+    elif direction == "DR":
+        rot_angle = math.radians(-45)
+    elif direction == "UL":
+        rot_angle = math.radians(135)
+    elif direction == "DL":
+        rot_angle = math.radians(-135)
+    
     rotation_text.text = 'ROTATION: {:.1f}'.format(math.degrees(rot_angle))
-    # -------------------------- #
+    # ----------------- #
 
     # --- RE-CALCULATE --- #
     start_x_r = ox + math.cos(rot_angle) * (start_x - ox) - math.sin(rot_angle) * (start_y - oy) 
@@ -214,9 +243,7 @@ def draw_arrow():
     #               #
 
     # --- ARROW STRAIGHT RIGHT --- #
-    if rot_angle == math.radians(0): 
-        direction = "R"
-
+    if direction == "R": 
         loading_bar = pyglet.shapes.Rectangle(start_x_r, start_y_r-18, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -228,10 +255,7 @@ def draw_arrow():
     # ---------------------------- #
         
     # --- ARROW STRAIGHT LEFT --- #
-    if rot_angle == math.radians(180): 
-        direction = "L"
-
-
+    if direction == "L":
         loading_bar = pyglet.shapes.Rectangle(start_x_r, start_y_r+18, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -243,9 +267,7 @@ def draw_arrow():
     # --------------------------- #
 
     # --- ARROW STRAIGHT UP --- #
-    if rot_angle == math.radians(90): 
-        direction = "U"
-
+    if direction == "U": 
         loading_bar = pyglet.shapes.Rectangle(start_x_r+18, start_y_r, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -257,9 +279,7 @@ def draw_arrow():
     # ------------------------- #
 
     # --- ARROW STRAIGHT DOWN --- #
-    if rot_angle == math.radians(-90): 
-        direction = "D"
-
+    if direction == "D": 
         loading_bar = pyglet.shapes.Rectangle(start_x_r-18, start_y_r, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -271,9 +291,7 @@ def draw_arrow():
     # --------------------------- #
         
     # --- ARROW UP TO THE RIGHT --- #
-    if rot_angle == math.radians(45): 
-        direction = "UR"
-
+    if direction == "UR": 
         loading_bar = pyglet.shapes.Rectangle(start_x_r+11, start_y_r-11, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -285,9 +303,7 @@ def draw_arrow():
     # ----------------------------- #
         
     # --- ARROW UP TO THE LEFT --- #
-    if rot_angle == math.radians(135): 
-        direction = "UL"
-
+    if direction == "UL": 
         loading_bar = pyglet.shapes.Rectangle(start_x_r+13, start_y_r+12, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -299,9 +315,7 @@ def draw_arrow():
     # ---------------------------- #
         
     # --- ARROW DOWN TO THE RIGHT --- #
-    if rot_angle == math.radians(-45): 
-        direction = "DR"
-
+    if direction == "DR":
         loading_bar = pyglet.shapes.Rectangle(start_x_r-12, start_y_r-9, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -313,9 +327,7 @@ def draw_arrow():
     # ------------------------------- #
 
     # --- ARROW DOWN TO THE LEFT --- #
-    if rot_angle == math.radians(-135): 
-        direction = "DL"
-
+    if direction == "DL":
         loading_bar = pyglet.shapes.Rectangle(start_x_r-12, start_y_r+14, 0, rect_size, GREEN, batch=line_batch) 
         loading_bar.rotation = -math.degrees(rot_angle)
 
@@ -592,9 +604,7 @@ def on_draw():
         inside_text.draw()
 
     if done:
-        draw_arrow()
-
-
+        draw_arrow(500, 500, "DL")
 
 pyglet.app.run()
 #---///-------------///---#
