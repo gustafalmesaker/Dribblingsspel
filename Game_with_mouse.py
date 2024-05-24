@@ -363,7 +363,7 @@ class Game():
             
 
         # Cursor
-        #drawL.append(pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius, batch=drawB))
+        drawL.append(pyglet.shapes.Circle(x=self.cursor.x, y=self.cursor.y, radius=self.cursor.radius, batch=drawB))
 
         #Points display in top midde of screen
         drawL.append(pyglet.text.Label("Points: " + str(self.point_system.points), font_name= 'Times New Roman', font_size=18, x=self.new_window.width//2 -100, y=self.new_window.height-50, anchor_x='center', batch=drawB))
@@ -420,7 +420,7 @@ class Game():
 
     def update(self, dt):
 
-        self.tracking()
+
 
         self.trackcounter += 1
 
