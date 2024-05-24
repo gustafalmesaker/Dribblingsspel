@@ -80,65 +80,15 @@ point4 = pyglet.text.Label('P4', font_name='Arial', font_size=12, x=0, y=0, anch
 # --- BOOLS --- #
 entered_correctly = True
 inside = False
-done = False
+done = True
 # ------------- #
 
 prog = 0
 rect_size = 35
 
 
-# --- START ARROW (STRAIGHT RIGHT) --- #
-# Start & End point
-end_x = width//2-100
-end_y = 125
 
-start_x = end_x - 400
-start_y = end_y
-
-# Arrow
-x3, y3 = end_x-100, end_y-75
-x4, y4 = end_x-100, end_y+75
-
-ox, oy = end_x, end_y
-rot_angle = math.radians(0)
-
-# Rotation
-start_x_r, start_y_r = ox + math.cos(rot_angle) * (start_x - ox) - math.sin(rot_angle) * (start_y - oy), oy + math.sin(rot_angle) * (start_x - ox) + math.cos(rot_angle) * (start_y - oy)
-end_x_r, end_y_r = ox + math.cos(rot_angle) * (end_x - ox) - math.sin(rot_angle) * (end_y - oy), oy + math.sin(rot_angle) * (end_x - ox) + math.cos(rot_angle) * (end_y - oy)
-x3_r, y3_r = ox + math.cos(rot_angle) * (x3 - ox) - math.sin(rot_angle) * (y3 - oy), oy + math.sin(rot_angle) * (x3 - ox) + math.cos(rot_angle) * (y3 - oy)
-x4_r, y4_r = ox + math.cos(rot_angle) * (x4 - ox) - math.sin(rot_angle) * (y4 - oy), oy + math.sin(rot_angle) * (x4 - ox) + math.cos(rot_angle) * (y4 - oy)
-
-point = pyglet.shapes.Circle(end_x_r, end_y_r, 15, None, RED, batch=line_batch)
-
-point1 = pyglet.shapes.Circle(start_x_r, start_y_r, 3, None, BLACK, batch=point_batch)
-point2 = pyglet.shapes.Circle(end_x_r, end_y_r, 3, None, BLACK, batch=point_batch)
-point3 = pyglet.shapes.Circle(x3_r, y3_r, 3, None, BLACK, batch=point_batch)
-point4 = pyglet.shapes.Circle(x4_r, y4_r, 3, None, BLACK, batch=point_batch)
-
-point1 = pyglet.text.Label('P1', font_name='Arial', font_size=12, x=start_x_r, y=start_y_r, anchor_x='center', anchor_y='center', color=(0, 0, 0, 255), batch=point_batch)    
-point2 = pyglet.text.Label('P2', font_name='Arial', font_size=12, x=end_x_r, y=end_y_r, anchor_x='center', anchor_y='center', color=(0, 0, 0, 255), batch=point_batch)    
-point3 = pyglet.text.Label('P3', font_name='Arial', font_size=12, x=x3_r, y=y3_r, anchor_x='center', anchor_y='center', color=(0, 0, 0, 255), batch=point_batch)    
-point4 = pyglet.text.Label('P4', font_name='Arial', font_size=12, x=x4_r, y=y4_r, anchor_x='center', anchor_y='center', color=(0, 0, 0, 255), batch=point_batch) 
-
-line1 = pyglet.shapes.Line(start_x_r, start_y_r, end_x_r, end_y_r, 30, RED, batch=line_batch) 
-line2 = pyglet.shapes.Line(end_x_r, end_y_r, x3_r, y3_r, 30, RED, batch=line_batch) 
-line3 = pyglet.shapes.Line(end_x_r, end_y_r, x4_r, y4_r, 30, RED, batch=line_batch) 
-
-angle1 = math.atan2(y3 - end_y, x3 - end_x) * 180 / math.pi
-angle2 = math.atan2(y4 - end_y, x4 - end_x) * 180 / math.pi
-
-if rot_angle == math.radians(0): 
-    loading_bar = pyglet.shapes.Rectangle(start_x_r, start_y_r-18, 0, rect_size, GREEN, batch=line_batch) 
-    loading_bar.rotation = -math.degrees(rot_angle)
-
-    loading_bar2 = pyglet.shapes.Rectangle(x3_r-12, y3_r+14, 0, rect_size, GREEN, batch=line_batch) 
-    loading_bar2.rotation = -math.degrees(math.radians(angle1))
-
-    loading_bar3 = pyglet.shapes.Rectangle(x4_r+10, y4_r+14, 0, rect_size, GREEN, batch=line_batch) 
-    loading_bar3.rotation = -math.degrees(math.radians(angle2))
-# ----------------------------------- #
-
-# -------------------------------- RESET -------------------------------- #
+# -------------------------------- DRAW ARROW -------------------------------- #
 @window.event
 def draw_arrow(arrow_x, arrow_y, dir):
     global start_x, start_y, end_x, end_y, x3, y3, x4, y4
@@ -162,17 +112,11 @@ def draw_arrow(arrow_x, arrow_y, dir):
     # -------------------- #
 
     # --- Start & End point --- #
-
     end_x = arrow_x
     end_y = arrow_y
 
     start_y = end_y
     start_x = end_x - 400
-
-    # start_x = random.randint(500, width-500)
-    # start_y = height//2
-    # end_x = start_x + 400
-    # end_y = start_y
 
     # Arrow
     x3, y3 = end_x-100, end_y-75
@@ -182,10 +126,9 @@ def draw_arrow(arrow_x, arrow_y, dir):
     oy = end_y
     # ------------------------- #
 
-
     # --- rot_angle --- #
+    # random
     # rot_angle = random.choice([math.radians(0), math.radians(90), math.radians(180), math.radians(-90), math.radians(45), math.radians(135), math.radians(-45), math.radians(-135)])
-    # print("rot_angle: ", math.degrees(rot_angle))
     direction = dir
 
     if direction == "R": 
@@ -240,9 +183,9 @@ def draw_arrow(arrow_x, arrow_y, dir):
     point4 = pyglet.text.Label('P4', font_name='Arial', font_size=12, x=x4_r, y=y4_r, anchor_x='center', anchor_y='center', color=(0, 0, 0, 255), batch=point_batch) 
     # ------------- #
 
-    #               #
-    #               #
-    #               #
+    #############################################
+    #       DRAW DIFFERENT TYPE OF ARROW        #
+    #############################################
 
     # --- ARROW STRAIGHT RIGHT --- #
     if direction == "R": 
@@ -341,8 +284,7 @@ def draw_arrow(arrow_x, arrow_y, dir):
     # ------------------------------ #
         
     direction_text.text = ('Direction: {}'.format(direction))
-
-# ---------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------------- #
     
 #--- RESET BUTTON ---#
 button_x = 50
@@ -367,12 +309,8 @@ reset_text = pyglet.text.Label('Reset', font_name='Arial', font_size=18, x=butto
 #--------------------#
 
 # ------------------------------ CHECK INSIDE -------------------------------- #
-
-
-
 def check_inside(x, y):
     global inside
-
     #box = pyglet.shapes.BorderedRectangle(start_x_r,start_y_r, 400, 30, 5, ORANGE, batch=line_batch)
     if (direction == "R" or direction == "L") and (x >= min(start_x_r, end_x_r) and x <= max(start_x_r, end_x_r)) and (y >= min(start_y_r-15, start_y_r+15) and y <= max(start_y_r-15, start_y_r+15)):
         inside = True
@@ -392,12 +330,7 @@ def check_inside(x, y):
 
 # ---------------------------------------------------------------------------- #
 
-
-
-
-
-
-
+# ------------------------------- LOADING BAR -------------------------------- #
 def update_loading_bar(x,y):
     global start_x, end_x, start_y, end_y, done, prog, rot_angle
 
@@ -564,8 +497,9 @@ def update_loading_bar(x,y):
             point.color = GREEN
             done = True
     # ----------------- #
-    
+# ---------------------------------------------------------------------------- #
 
+    
 ball = pyglet.shapes.Circle(width//2, height//2, 80, None, BLACK, batch=game_batch)
 
 # --- MOUSE MOTION --- #
@@ -574,24 +508,17 @@ def on_mouse_motion(x, y, dx, dy):
     update_cursor_position_text(x, y)  # Update cursor position text
 
     check_inside(x, y)
+
     # Update ball position to follow the mouse cursor
     ball.x = x
     ball.y = y
 
     # --- UPDATE LOADING BAR --- #
-
     if entered_correctly and inside:
         update_loading_bar(x, y)
-        
-    #else:
-    #    entered_corr(x, y)
-        
-     # -/- UPDATE LOADING BAR -/- #
-        
-# -/- MOUSE ROATION -/- #
-
-
-# -------- FAKE GAME -------- #
+# -------------------- #
+  
+# -------- FAKE GAME for pictures -------- #
 gline1 = pyglet.shapes.Line(width//2, 220, width//2, 750, 20, color=(0, 255, 0, 100), batch=game_batch)
 gcircle1 = pyglet.shapes.Circle(width//2, 125, 100, None, color=(0, 255, 0, 100), batch=game_batch)
 wcircle1 = pyglet.shapes.Circle(width//2, 125, 85, None, WHITE, batch=game_batch)
@@ -605,7 +532,7 @@ gcircle3 = pyglet.shapes.Circle(290, 130, 100, None, color=(0, 255, 0, 100), bat
 wcircle3 = pyglet.shapes.Circle(290, 130, 85, None, WHITE, batch=game_batch)
 
 gline4 = pyglet.shapes.Line(340, 210, width//2-80, 710, 20, color=(0, 255, 0, 100), batch=game_batch)
-# --------------------------- #
+# ---------------------------------------- #
 
 counter = 1
 #####################################################################################
