@@ -23,6 +23,7 @@ ORANGE = (255, 140, 0, 255)
 line_batch = pyglet.graphics.Batch()
 point_batch = pyglet.graphics.Batch()
 text_batch = pyglet.graphics.Batch()
+game_batch = pyglet.graphics.Batch()
 
 direction = "R"
 
@@ -88,10 +89,11 @@ rect_size = 35
 
 # --- START ARROW (STRAIGHT RIGHT) --- #
 # Start & End point
-start_x = random.randint(500, width-500)
-start_y = height//2
-end_x = start_x + 400
-end_y = start_y
+end_x = width//2-100
+end_y = 125
+
+start_x = end_x - 400
+start_y = end_y
 
 # Arrow
 x3, y3 = end_x-100, end_y-75
@@ -564,14 +566,17 @@ def update_loading_bar(x,y):
     # ----------------- #
     
 
+ball = pyglet.shapes.Circle(width//2, height//2, 80, None, BLACK, batch=game_batch)
 
-
-# --- MOUSE ROATION --- #
+# --- MOUSE MOTION --- #
 @window.event
 def on_mouse_motion(x, y, dx, dy):
     update_cursor_position_text(x, y)  # Update cursor position text
 
     check_inside(x, y)
+    # Update ball position to follow the mouse cursor
+    ball.x = x
+    ball.y = y
 
     # --- UPDATE LOADING BAR --- #
 
@@ -586,25 +591,53 @@ def on_mouse_motion(x, y, dx, dy):
 # -/- MOUSE ROATION -/- #
 
 
+# -------- FAKE GAME -------- #
+gline1 = pyglet.shapes.Line(width//2, 220, width//2, 750, 20, color=(0, 255, 0, 100), batch=game_batch)
+gcircle1 = pyglet.shapes.Circle(width//2, 125, 100, None, color=(0, 255, 0, 100), batch=game_batch)
+wcircle1 = pyglet.shapes.Circle(width//2, 125, 85, None, WHITE, batch=game_batch)
+
+gline2 = pyglet.shapes.Line(width//2, 220, width//2, 750, 20, color=(0, 255, 0, 100), batch=game_batch)
+gcircle2 = pyglet.shapes.Circle(width//2, 750, 100, None, color=(0, 255, 0, 100), batch=game_batch)
+wcircle2 = pyglet.shapes.Circle(width//2, 750, 85, None, WHITE, batch=game_batch)
+
+gline3 = pyglet.shapes.Line(385, 130, width//2-95, 130, 20, color=(0, 255, 0, 100), batch=game_batch)
+gcircle3 = pyglet.shapes.Circle(290, 130, 100, None, color=(0, 255, 0, 100), batch=game_batch)
+wcircle3 = pyglet.shapes.Circle(290, 130, 85, None, WHITE, batch=game_batch)
+
+gline4 = pyglet.shapes.Line(340, 210, width//2-80, 710, 20, color=(0, 255, 0, 100), batch=game_batch)
+# --------------------------- #
+
+counter = 1
 #####################################################################################
 ##                                       APP                                       ##
 #####################################################################################
 @window.event
 def on_draw():
+    global counter
     pyglet.gl.glClearColor(1, 1, 1, 1)
     
     window.clear()
 
+    game_batch.draw()
     line_batch.draw()
-    point_batch.draw()
-    text_batch.draw()
-    button_shape.draw()
+    #point_batch.draw()
+    #text_batch.draw()
+    #button_shape.draw()
 
     if inside:
         inside_text.draw()
 
-    if done:
-        draw_arrow(500, 500, "DL")
+    if done and counter == 0:
+        draw_arrow(width//2-100, 125, "R")
+        counter = counter+1
+
+    if done and counter == 1:
+        draw_arrow(width//2, 650, "U")
+        counter = counter+1
+    
+    if done and counter == 2:
+        draw_arrow(355, 210, "DL")
+        counter = 0
 
 pyglet.app.run()
 #---///-------------///---#
